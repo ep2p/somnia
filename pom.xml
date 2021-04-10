@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.ep2p</groupId>
-    <artifactId>somnia</artifactId>
+    <artifactId>somnia-core</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>

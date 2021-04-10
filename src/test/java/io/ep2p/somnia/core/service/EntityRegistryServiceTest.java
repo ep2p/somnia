@@ -1,10 +1,8 @@
-package io.ep2p.somnia.service;
+package io.ep2p.somnia.core.service;
 
-import io.ep2p.somnia.annotation.SomniaEntity;
-import io.ep2p.somnia.model.StorageMethod;
+import io.ep2p.somnia.core.annotation.SomniaEntity;
+import io.ep2p.somnia.core.model.StorageMethod;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class EntityRegistryServiceTest {
 

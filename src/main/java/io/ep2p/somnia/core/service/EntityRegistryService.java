@@ -1,6 +1,6 @@
-package io.ep2p.somnia.service;
+package io.ep2p.somnia.core.service;
 
-import io.ep2p.somnia.util.Validator;
+import io.ep2p.somnia.core.util.Validator;
 
 import java.util.HashSet;
 import java.util.Set;

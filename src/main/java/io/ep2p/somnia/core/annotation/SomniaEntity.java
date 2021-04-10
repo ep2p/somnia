@@ -1,6 +1,6 @@
-package io.ep2p.somnia.annotation;
+package io.ep2p.somnia.core.annotation;
 
-import io.ep2p.somnia.model.StorageMethod;
+import io.ep2p.somnia.core.model.StorageMethod;
 
 import java.lang.annotation.*;
 

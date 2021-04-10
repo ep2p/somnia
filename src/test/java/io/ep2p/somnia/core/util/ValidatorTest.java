@@ -1,7 +1,8 @@
-package io.ep2p.somnia.util;
+package io.ep2p.somnia.core.util;
 
-import io.ep2p.somnia.annotation.SomniaEntity;
-import io.ep2p.somnia.model.StorageMethod;
+import io.ep2p.somnia.core.annotation.SomniaEntity;
+import io.ep2p.somnia.core.model.StorageMethod;
+import io.ep2p.somnia.core.util.Validator;
 import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;

@@ -7,20 +7,18 @@ import io.ep2p.somnia.core.util.Validator;
 import lombok.SneakyThrows;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Registers SomniaEntity objects and generates fingerprint of database
  */
 public class EntityRegistryService {
-    private final Set<Object> objects;
+    private final List<Object> objects;
     private final ObjectMapper objectMapper;
 
     public EntityRegistryService(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        objects = new HashSet<>();
+        objects = new ArrayList<>();
     }
 
     public EntityRegistryService(){
@@ -30,8 +28,8 @@ public class EntityRegistryService {
     /**
      * @param o register a SomniaEntity
      */
-    public void register(Object o){
-        if (Validator.isValidSomniaEntity(o)) {
+    public synchronized void register(Object o){
+        if (!objects.contains(o) && Validator.isValidSomniaEntity(o)) {
             objects.add(o);
         }
     }
@@ -42,28 +40,24 @@ public class EntityRegistryService {
      * @return fingerprint of database
      */
     @SneakyThrows
-    public String getFingerprint(){
-        List<EntityIdentity> idendities = getIdendities(getSortedObjects());
+    public synchronized String getFingerprint(){
+        sortObjects();
+        List<EntityIdentity> idendities = getIdentities();
         Scheme scheme = new Scheme(idendities);
         String schemeJson = objectMapper.writeValueAsString(scheme);
 
         return null;
     }
 
-    /**
-     * @return sorted somnia objects
-     */
-    public List<Object> getSortedObjects(){
+    public void sortObjects(){
 
-        return new ArrayList<>();
     }
 
 
     /**
-     * @param sortedObjects SomniaEntity sorted objects
      * @return List of EntityIdentity
      */
-    public static List<EntityIdentity> getIdendities(List<Object> sortedObjects){
+    public static List<EntityIdentity> getIdentities(){
 
         return new ArrayList<>();
     }

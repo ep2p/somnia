@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Registers SomniaEntity objects and generates fingerprint of database
  */
-public class EntityRegistryService {
+public class EntityRegistryService implements EntityRegistryApi {
     private final List<Object> objects;
     private final ObjectMapper objectMapper;
 

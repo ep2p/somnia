@@ -28,7 +28,7 @@ class EntityRegistryServiceTest {
             private String name;
         }
 
-        @SomniaEntity(name = "sample_entity", method = StorageMethod.POPULATED)
+        @SomniaEntity(name = "sample_entity", method = StorageMethod.POPULATE)
         class SampleSomniaEntity5 {
             private String name;
         }

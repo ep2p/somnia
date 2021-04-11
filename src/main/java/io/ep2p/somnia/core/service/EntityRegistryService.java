@@ -1,8 +1,14 @@
 package io.ep2p.somnia.core.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.ep2p.somnia.core.model.EntityIdentity;
+import io.ep2p.somnia.core.model.Scheme;
 import io.ep2p.somnia.core.util.Validator;
+import lombok.SneakyThrows;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -10,10 +16,15 @@ import java.util.Set;
  */
 public class EntityRegistryService {
     private final Set<Object> objects;
-    private String cachedFingerPrint;
+    private final ObjectMapper objectMapper;
 
-    public EntityRegistryService() {
+    public EntityRegistryService(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
         objects = new HashSet<>();
+    }
+
+    public EntityRegistryService(){
+        this(new ObjectMapper());
     }
 
     /**
@@ -30,13 +41,31 @@ public class EntityRegistryService {
     /**
      * @return fingerprint of database
      */
+    @SneakyThrows
     public String getFingerprint(){
+        List<EntityIdentity> idendities = getIdendities(getSortedObjects());
+        Scheme scheme = new Scheme(idendities);
+        String schemeJson = objectMapper.writeValueAsString(scheme);
 
         return null;
     }
 
-    private boolean isCached(){
-        return cachedFingerPrint != null;
+    /**
+     * @return sorted somnia objects
+     */
+    public List<Object> getSortedObjects(){
+
+        return new ArrayList<>();
+    }
+
+
+    /**
+     * @param sortedObjects SomniaEntity sorted objects
+     * @return List of EntityIdentity
+     */
+    public static List<EntityIdentity> getIdendities(List<Object> sortedObjects){
+
+        return new ArrayList<>();
     }
 
 }

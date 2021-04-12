@@ -51,13 +51,10 @@ public class EntityRegistryService implements EntityRegistryApi {
     }
 
     public void sortObjects(){
-        this.objects.sort(new Comparator<Object>() {
-            @Override
-            public int compare(final Object object1, final Object object2) {
-                String o1name = object1.getClass().getAnnotationsByType(SomniaEntity.class)[0].name();
-                String o2name = object2.getClass().getAnnotationsByType(SomniaEntity.class)[0].name();
-                return o1name.compareTo(o2name);
-            }
+        this.objects.sort((object1, object2) -> {
+            String o1name = object1.getClass().getAnnotationsByType(SomniaEntity.class)[0].name();
+            String o2name = object2.getClass().getAnnotationsByType(SomniaEntity.class)[0].name();
+            return o1name.compareTo(o2name);
         });
     }
 
@@ -80,7 +77,7 @@ public class EntityRegistryService implements EntityRegistryApi {
     }
 
     @VisibleForTesting
-    private EntityIdentity processEntity(Object object) {
+    EntityIdentity processEntity(Object object) {
         SomniaEntity somniaEntity = object.getClass().getAnnotationsByType(SomniaEntity.class)[0];
         return EntityIdentity.builder()
                 .method(somniaEntity.method())
@@ -89,7 +86,7 @@ public class EntityRegistryService implements EntityRegistryApi {
                 .build();
     }
 
-    @VisibleForTesting
+
     private List<EntityIdentity.FieldIdentity> processFields(Object object, List<String> indexes){
         List<EntityIdentity.FieldIdentity> fieldIdentities = new ArrayList<>();
 

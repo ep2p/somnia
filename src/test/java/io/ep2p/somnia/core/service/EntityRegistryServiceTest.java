@@ -2,6 +2,7 @@ package io.ep2p.somnia.core.service;
 
 import io.ep2p.somnia.core.annotation.IgnoreField;
 import io.ep2p.somnia.core.annotation.SomniaEntity;
+import io.ep2p.somnia.core.model.EntityIdentity;
 import io.ep2p.somnia.core.model.StorageMethod;
 import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
@@ -9,12 +10,13 @@ import org.junit.jupiter.api.Test;
 import java.io.Serializable;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EntityRegistryServiceTest {
 
     @Test
     public void processEntity(){
-        @SomniaEntity(name = "sample_entity", method = StorageMethod.HIT)
+        @SomniaEntity(name = "sample_entity", method = StorageMethod.HIT, indexes = {"name", "unknown"})
         class SampleSomniaEntity implements Serializable {
             private String name;
             @IgnoreField
@@ -22,10 +24,13 @@ class EntityRegistryServiceTest {
         }
 
         EntityRegistryService service = new EntityRegistryService();
-        service.register(new SampleSomniaEntity());
+        EntityIdentity entityIdentity = service.processEntity(new SampleSomniaEntity());
+        assertEquals(entityIdentity.getName(), "sample_entity");
+        assertEquals(entityIdentity.getMethod(), StorageMethod.HIT);
+        assertEquals(entityIdentity.getFields().size(), 1);
+        assertEquals(entityIdentity.getFields().get(0).getName(), "name");
+        assertTrue(entityIdentity.getFields().get(0).isIndex());
 
-        service.sortObjects();
-        System.out.println(service.getIdentities());
     }
 
     @Test

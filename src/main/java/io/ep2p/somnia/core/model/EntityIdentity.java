@@ -6,7 +6,10 @@ import java.util.List;
 
 @Data
 @Builder
+@AllArgsConstructor
 @NoArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class EntityIdentity {
     private String name;
     private StorageMethod method;
@@ -14,7 +17,10 @@ public class EntityIdentity {
 
     @Data
     @Builder
+    @AllArgsConstructor
     @NoArgsConstructor
+    @ToString
+    @EqualsAndHashCode
     public static class FieldIdentity {
         private String name;
         private boolean index;

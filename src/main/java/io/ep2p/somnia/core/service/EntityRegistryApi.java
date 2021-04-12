@@ -10,4 +10,23 @@ public interface EntityRegistryApi {
      * @return fingerprint of database
      */
     String getFingerprint();
+
+    abstract class Decorator implements EntityRegistryApi {
+        private final EntityRegistryApi entityRegistryApi;
+
+        public Decorator(EntityRegistryApi entityRegistryApi) {
+            this.entityRegistryApi = entityRegistryApi;
+        }
+
+        @Override
+        public void register(Object o) {
+            this.entityRegistryApi.register(o);
+        }
+
+        @Override
+        public String getFingerprint() {
+            return this.entityRegistryApi.getFingerprint();
+        }
+    }
+
 }

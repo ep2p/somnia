@@ -1,6 +1,6 @@
 package io.ep2p.somnia.core.service;
 
-public class EntityRegistryApiDecorator implements EntityRegistryApi {
+public abstract class EntityRegistryApiDecorator implements EntityRegistryApi {
     private final EntityRegistryApi entityRegistryApi;
 
     public EntityRegistryApiDecorator(EntityRegistryApi entityRegistryApi) {

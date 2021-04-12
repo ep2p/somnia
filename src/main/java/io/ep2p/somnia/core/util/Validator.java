@@ -15,6 +15,6 @@ public class Validator {
      * @return if passed object is a valid SomniaEntity
      */
     public static boolean isValidSomniaEntity(Object o){
-        return o instanceof Serializable && o.getClass().getAnnotationsByType(SomniaEntity.class).length > 0;
+        return o instanceof Serializable && o.getClass().getAnnotation(SomniaEntity.class) != null;
     }
 }

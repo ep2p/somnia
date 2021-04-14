@@ -1,4 +1,4 @@
-package io.ep2p.somnia.core.config;
+package io.ep2p.somnia.config;
 
 import lombok.Getter;
 import lombok.Setter;

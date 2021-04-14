@@ -1,4 +1,4 @@
-package io.ep2p.somnia.core.model;
+package io.ep2p.somnia.model;
 
 import lombok.*;
 

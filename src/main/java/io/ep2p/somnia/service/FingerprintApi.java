@@ -1,4 +1,4 @@
-package io.ep2p.somnia.core.service;
+package io.ep2p.somnia.service;
 
 import org.apache.commons.codec.digest.DigestUtils;
 

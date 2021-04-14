@@ -1,9 +1,10 @@
 package io.ep2p.somnia.core.service;
 
-import io.ep2p.somnia.core.annotation.IgnoreField;
-import io.ep2p.somnia.core.annotation.SomniaEntity;
-import io.ep2p.somnia.core.model.EntityIdentity;
-import io.ep2p.somnia.core.model.StorageMethod;
+import io.ep2p.somnia.annotation.IgnoreField;
+import io.ep2p.somnia.annotation.SomniaEntity;
+import io.ep2p.somnia.model.EntityIdentity;
+import io.ep2p.somnia.model.StorageMethod;
+import io.ep2p.somnia.service.EntityRegistryService;
 import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
 

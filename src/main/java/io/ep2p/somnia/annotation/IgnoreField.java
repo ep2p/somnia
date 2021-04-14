@@ -1,4 +1,4 @@
-package io.ep2p.somnia.core.annotation;
+package io.ep2p.somnia.annotation;
 
 import java.lang.annotation.*;
 

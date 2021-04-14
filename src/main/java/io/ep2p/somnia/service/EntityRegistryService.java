@@ -1,12 +1,11 @@
-package io.ep2p.somnia.core.service;
+package io.ep2p.somnia.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.annotations.VisibleForTesting;
-import io.ep2p.somnia.core.annotation.IgnoreField;
-import io.ep2p.somnia.core.annotation.SomniaEntity;
-import io.ep2p.somnia.core.model.EntityIdentity;
-import io.ep2p.somnia.core.model.Scheme;
-import io.ep2p.somnia.core.util.Validator;
+import io.ep2p.somnia.annotation.IgnoreField;
+import io.ep2p.somnia.annotation.SomniaEntity;
+import io.ep2p.somnia.model.EntityIdentity;
+import io.ep2p.somnia.model.Scheme;
+import io.ep2p.somnia.util.Validator;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 
@@ -74,8 +73,7 @@ public class EntityRegistryService implements EntityRegistryApi {
         return identities;
     }
 
-    @VisibleForTesting
-    EntityIdentity processEntity(Object object) {
+    public EntityIdentity processEntity(Object object) {
         SomniaEntity somniaEntity = object.getClass().getAnnotationsByType(SomniaEntity.class)[0];
         return EntityIdentity.builder()
                 .method(somniaEntity.method())

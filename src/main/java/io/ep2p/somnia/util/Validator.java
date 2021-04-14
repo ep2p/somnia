@@ -1,6 +1,6 @@
-package io.ep2p.somnia.core.util;
+package io.ep2p.somnia.util;
 
-import io.ep2p.somnia.core.annotation.SomniaEntity;
+import io.ep2p.somnia.annotation.SomniaEntity;
 
 import java.io.Serializable;
 

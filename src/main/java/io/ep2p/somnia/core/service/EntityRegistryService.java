@@ -35,16 +35,14 @@ public class EntityRegistryService implements EntityRegistryApi {
         }
     }
 
-    //todo
-
     /**
      * @return fingerprint of database
      */
     @SneakyThrows
     public synchronized String getFingerprint(){
         sortObjects();
-        List<EntityIdentity> idendities = getIdentities();
-        Scheme scheme = new Scheme(idendities);
+        List<EntityIdentity> identities = getIdentities();
+        Scheme scheme = new Scheme(identities);
         String schemeJson = objectMapper.writeValueAsString(scheme);
 
         return fingerprintApi.generateFingerprint(schemeJson);

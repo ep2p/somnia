@@ -62,7 +62,20 @@
             <version>30.0-jre</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.ep2p</groupId>
+            <artifactId>kademlia-api</artifactId>
+            <version>1.5.0-RELEASE</version>
+        </dependency>
+
 
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
 </project>

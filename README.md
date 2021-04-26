@@ -1,5 +1,13 @@
-# somnia
-Kademlia based decentralized database written in Java, having simplicity in mind while also focusing on giving developer control.
+```
+-------------------------------------------------------------
+|   ______                                      _           |
+| .' ____ \                                    (_)          |
+| | (___ \_|   .--.    _ .--..--.    _ .--.    __    ,--.   |
+|  _.____`.  / .'`\ \ [ `.-. .-. |  [ `.-. |  [  |  `'_\ :  |
+| | \____) | | \__. |  | | | | | |   | | | |   | |  // | |, |
+|  \______.'  '.__.'  [___||__||__] [___||__] [___] \'-;__/ |
+-------------------------------------------------------------
+|   Decentralized storage based on MongoDB and SpringBoot   |
+-------------------------------------------------------------
+```
 
-## Somnia Core
-This module is the abstaction layer and core of any Somnia implmenetation.

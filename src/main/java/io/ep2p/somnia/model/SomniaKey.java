@@ -1,9 +1,6 @@
 package io.ep2p.somnia.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigInteger;
 
@@ -11,9 +8,10 @@ import java.math.BigInteger;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class SomniaKey {
     private BigInteger key;
-    private String entity;
-    private BigInteger node;
+    private String name;
+    private BigInteger hash;
     private BigInteger requester;
 }

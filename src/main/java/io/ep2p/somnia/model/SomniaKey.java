@@ -1,16 +1,19 @@
 package io.ep2p.somnia.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * @param <ID> Key ID for data to look up of insert
- */
+import java.math.BigInteger;
+
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SomniaKey<ID extends Number> {
-    private ID key;
+public class SomniaKey {
+    private BigInteger key;
     private String entity;
-    private ID node;
+    private BigInteger node;
+    private BigInteger requester;
 }

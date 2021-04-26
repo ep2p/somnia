@@ -65,7 +65,7 @@
         <dependency>
             <groupId>com.github.ep2p</groupId>
             <artifactId>kademlia-api</artifactId>
-            <version>1.5.0-RELEASE</version>
+            <version>1.5.1-RELEASE</version>
         </dependency>
 
         <dependency>

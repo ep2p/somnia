@@ -6,13 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigInteger;
 import java.util.List;
 
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SomniaValue<ID extends Number> {
-    private List<ID> owners;
+public class SomniaValue {
+    private List<BigInteger> owners;
     private JsonNode data;
 }

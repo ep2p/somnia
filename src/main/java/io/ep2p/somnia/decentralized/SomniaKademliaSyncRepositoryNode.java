@@ -29,14 +29,14 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
             NodeConnectionApi<BigInteger, SomniaConnectionInfo> nodeConnectionApi,
             SomniaConnectionInfo connectionInfo,
             KademliaRepository<SomniaKey, SomniaValue> kademliaRepository,
-            KeyHashGenerator<BigInteger, SomniaKey> keyHashGenerator, SomniaEntityManager somniaEntityManager) {
+            SomniaEntityManager somniaEntityManager) {
         super(
                 nodeId,
                 routingTable,
                 nodeConnectionApi,
                 connectionInfo,
                 kademliaRepository,
-                keyHashGenerator);
+                new SomniaKeyHashGenerator());
         this.somniaEntityManager = somniaEntityManager;
     }
 

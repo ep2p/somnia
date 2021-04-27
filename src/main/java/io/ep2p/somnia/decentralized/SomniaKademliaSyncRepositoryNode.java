@@ -8,7 +8,6 @@ import com.github.ep2p.kademlia.node.KademliaSyncRepositoryNode;
 import com.github.ep2p.kademlia.node.Node;
 import com.github.ep2p.kademlia.table.Bucket;
 import com.github.ep2p.kademlia.table.RoutingTable;
-import com.github.ep2p.kademlia.util.KeyHashGenerator;
 import io.ep2p.somnia.annotation.SomniaDocument;
 import io.ep2p.somnia.model.SomniaConnectionInfo;
 import io.ep2p.somnia.model.SomniaKey;

@@ -2,6 +2,7 @@ package io.ep2p.somnia.decentralized;
 
 import com.github.ep2p.kademlia.connection.NodeConnectionApi;
 import com.github.ep2p.kademlia.model.FindNodeAnswer;
+import com.github.ep2p.kademlia.model.StoreAnswer;
 import com.github.ep2p.kademlia.node.KademliaRepository;
 import com.github.ep2p.kademlia.node.KademliaSyncRepositoryNode;
 import com.github.ep2p.kademlia.node.Node;
@@ -55,8 +56,19 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
                 handleHitStore(caller, requester, key, value);
                 break;
             case DISTRIBUTE:
-
+                handleDistributedStore(caller, requester, key, value);
                 break;
+        }
+    }
+
+    private void handleDistributedStore(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {
+        if (this.getId().equals(key.getHash())) {
+            doStore(requester, key, value);
+        } else {
+            // still, store the data
+            getKademliaRepository().store(key, value);
+            // but also pass data to the closest node to store it
+            FindNodeAnswer<BigInteger, SomniaConnectionInfo> findNodeAnswer = this.getRoutingTable().findClosest(key.getHash());
 
         }
     }
@@ -68,8 +80,8 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
         } else {
             // Otherwise, find the closest node possible to store the data
             // If no such a node was found, just store the data
-            FindNodeAnswer<BigInteger, SomniaConnectionInfo> findNodeAnswer = this.getRoutingTable().findClosest(key.getHash());
-            if (this.storeDataToClosestNode(requester, findNodeAnswer.getNodes(), key, value, caller) == null) {
+            StoreAnswer<BigInteger, SomniaKey> result = storeInClosestNodes(requester, key, value, caller);
+            if (result == null) {
                 doStore(requester, key, value);
             }
         }
@@ -83,6 +95,12 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
             log.error("Failed to store data on kademlia. " + key, e);
             this.getNodeConnectionApi().sendStoreResults(this, requester, key, false);
         }
+    }
+
+
+    private StoreAnswer<BigInteger, SomniaKey> storeInClosestNodes(Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value, Node<BigInteger, SomniaConnectionInfo> caller){
+        FindNodeAnswer<BigInteger, SomniaConnectionInfo> findNodeAnswer = this.getRoutingTable().findClosest(hash(key));
+        return this.storeDataToClosestNode(requester, findNodeAnswer.getNodes(), key, value, caller);
     }
 
 }

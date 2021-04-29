@@ -92,17 +92,10 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
     }
 
     private void handleHitStore(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {
-        if (this.getId().equals(key.getHash())) {
-            // Hash is not bounded since both network size and keys are BigInteger type. If by any change they are equal, lets store the data
-            doStore(requester, key, value);
-        } else {
-            // Otherwise, find the closest node possible to store the data
-            // If no such a node was found, just store the data
-            StoreAnswer<BigInteger, SomniaKey> result = storeInClosestNodes(requester, key, value, caller);
-            if (result == null) {
-                doStore(requester, key, value);
-            }
-        }
+        if (getKademliaRepository().contains(key))
+            return;
+        doStore(requester, key, value);
+        distributeDataToOtherNodes(requester, key, value, caller);
     }
 
     private void doStore(Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {
@@ -119,6 +112,44 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
     private StoreAnswer<BigInteger, SomniaKey> storeInClosestNodes(Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value, Node<BigInteger, SomniaConnectionInfo> caller){
         FindNodeAnswer<BigInteger, SomniaConnectionInfo> findNodeAnswer = this.getRoutingTable().findClosest(hash(key));
         return this.storeDataToClosestNode(requester, findNodeAnswer.getNodes(), key, value, caller);
+    }
+
+
+
+    protected void distributeDataToOtherNodes(Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value, Node<BigInteger, SomniaConnectionInfo> nodeToIgnore){
+        Date date = getDateOfSecondsAgo(LAST_SEEN_SECONDS_TO_CONSIDER_ALIVE);
+        StoreAnswer<BigInteger, SomniaKey> storeAnswer = null;
+
+        FindNodeAnswer<BigInteger, SomniaConnectionInfo> findNodeAnswer = this.getRoutingTable().findClosest(hash(key));
+
+        for (ExternalNode<BigInteger, SomniaConnectionInfo> externalNode : findNodeAnswer.getNodes()) {
+            //skip current node
+            if(externalNode.getId().equals(getId())){
+                if (key.getDistributions() > 3){
+                    break;
+                }else {
+                    continue;
+                }
+            }
+            // skip the ignored node
+            if(nodeToIgnore != null && nodeToIgnore.getId().equals(externalNode.getId())){
+                continue;
+            }
+            // if minimum distribution has reached, there is no need to distribute more
+            if (key.getDistributions() == this.config.getMinimumDistribution()){
+                break;
+            }
+
+            //try next close requester in routing table
+            PingAnswer<BigInteger> pingAnswer;
+            //if external node is alive, tell it to store the data
+            if(externalNode.getLastSeen().before(date) || (pingAnswer = getNodeConnectionApi().ping(this, externalNode)).isAlive()){
+                key.incrementDistribution();
+                getNodeConnectionApi().storeAsync(this, requester, externalNode, key, value);
+            }else if(!pingAnswer.isAlive()){
+                getRoutingTable().delete(externalNode);
+            }
+        }
     }
 
 }

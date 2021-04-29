@@ -15,7 +15,6 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public abstract class SomniaEntity<D extends Serializable> {
     private D data;
     private BigInteger key;

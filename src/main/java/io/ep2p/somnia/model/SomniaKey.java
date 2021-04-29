@@ -14,4 +14,10 @@ public class SomniaKey {
     private String name;
     private BigInteger hash;
     private BigInteger requester;
+    @Builder.Default
+    private int distributions = 0;
+
+    public synchronized void incrementDistribution(){
+        this.distributions++;
+    }
 }

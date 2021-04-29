@@ -2,10 +2,12 @@ package io.ep2p.somnia.decentralized;
 
 import com.github.ep2p.kademlia.connection.NodeConnectionApi;
 import com.github.ep2p.kademlia.model.FindNodeAnswer;
+import com.github.ep2p.kademlia.model.PingAnswer;
 import com.github.ep2p.kademlia.model.StoreAnswer;
 import com.github.ep2p.kademlia.node.KademliaRepository;
 import com.github.ep2p.kademlia.node.KademliaSyncRepositoryNode;
 import com.github.ep2p.kademlia.node.Node;
+import com.github.ep2p.kademlia.node.external.ExternalNode;
 import com.github.ep2p.kademlia.table.Bucket;
 import com.github.ep2p.kademlia.table.RoutingTable;
 import io.ep2p.somnia.annotation.SomniaDocument;
@@ -15,11 +17,17 @@ import io.ep2p.somnia.model.SomniaValue;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigInteger;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+
+import static com.github.ep2p.kademlia.Common.LAST_SEEN_SECONDS_TO_CONSIDER_ALIVE;
+import static com.github.ep2p.kademlia.util.DateUtil.getDateOfSecondsAgo;
 
 @Slf4j
 public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode<BigInteger, SomniaConnectionInfo, SomniaKey, SomniaValue> {
     private final SomniaEntityManager somniaEntityManager;
+    private final Config config;
 
     public SomniaKademliaSyncRepositoryNode(
             BigInteger nodeId,
@@ -29,6 +37,17 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
             SomniaConnectionInfo connectionInfo,
             KademliaRepository<SomniaKey, SomniaValue> kademliaRepository,
             SomniaEntityManager somniaEntityManager) {
+        this(nodeId, routingTable,nodeConnectionApi, connectionInfo, kademliaRepository, somniaEntityManager, new Config());
+    }
+
+    public SomniaKademliaSyncRepositoryNode(
+            BigInteger nodeId,
+            RoutingTable<BigInteger, SomniaConnectionInfo, Bucket<BigInteger, SomniaConnectionInfo>>
+                    routingTable,
+            NodeConnectionApi<BigInteger, SomniaConnectionInfo> nodeConnectionApi,
+            SomniaConnectionInfo connectionInfo,
+            KademliaRepository<SomniaKey, SomniaValue> kademliaRepository,
+            SomniaEntityManager somniaEntityManager, Config config) {
         super(
                 nodeId,
                 routingTable,
@@ -37,6 +56,7 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
                 kademliaRepository,
                 new SomniaKeyHashGenerator());
         this.somniaEntityManager = somniaEntityManager;
+        this.config = config;
     }
 
     @Override
@@ -64,11 +84,10 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
         if (this.getId().equals(key.getHash())) {
             doStore(requester, key, value);
         } else {
+            // pass data to the closest node to store it
+            StoreAnswer<BigInteger, SomniaKey> storeAnswer = storeInClosestNodes(requester, key, value, caller);
             // still, store the data
             getKademliaRepository().store(key, value);
-            // but also pass data to the closest node to store it
-            FindNodeAnswer<BigInteger, SomniaConnectionInfo> findNodeAnswer = this.getRoutingTable().findClosest(key.getHash());
-
         }
     }
 

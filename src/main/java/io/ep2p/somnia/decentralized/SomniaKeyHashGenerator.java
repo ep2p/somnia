@@ -9,6 +9,6 @@ public class SomniaKeyHashGenerator implements KeyHashGenerator<BigInteger, Somn
 
     @Override
     public BigInteger generate(SomniaKey somniaKey) {
-        return somniaKey.getHash();
+        return somniaKey.getHitNode() != null ? somniaKey.getHitNode() : somniaKey.getHash();
     }
 }

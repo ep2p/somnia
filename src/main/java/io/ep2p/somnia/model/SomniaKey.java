@@ -13,7 +13,7 @@ public class SomniaKey {
     private BigInteger key;
     private String name;
     private BigInteger hash;
-    private BigInteger requester;
+    private BigInteger hitNode;
     @Builder.Default
     private int distributions = 0;
 

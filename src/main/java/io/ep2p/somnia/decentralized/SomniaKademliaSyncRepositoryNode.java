@@ -2,6 +2,7 @@ package io.ep2p.somnia.decentralized;
 
 import com.github.ep2p.kademlia.connection.NodeConnectionApi;
 import com.github.ep2p.kademlia.model.FindNodeAnswer;
+import com.github.ep2p.kademlia.model.GetAnswer;
 import com.github.ep2p.kademlia.model.PingAnswer;
 import com.github.ep2p.kademlia.model.StoreAnswer;
 import com.github.ep2p.kademlia.node.KademliaRepository;
@@ -18,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigInteger;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 import static com.github.ep2p.kademlia.Common.LAST_SEEN_SECONDS_TO_CONSIDER_ALIVE;
@@ -57,6 +57,70 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
                 new SomniaKeyHashGenerator());
         this.somniaEntityManager = somniaEntityManager;
         this.config = config;
+    }
+
+    @Override
+    public void onGetRequest(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key) {
+        Optional<SomniaDocument> optionalSomniaDocument = somniaEntityManager.getDocumentOfName(key.getName());
+        if(!optionalSomniaDocument.isPresent()){
+            this.getNodeConnectionApi().sendGetResults(this, requester, key, null);
+        }else {
+            handleGetRequest(caller, requester, key, optionalSomniaDocument.get());
+        }
+    }
+
+    private void handleGetRequest(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaDocument somniaDocument) {
+        if (getKademliaRepository().contains(key)) {
+            this.getNodeConnectionApi().sendGetResults(this, requester, key, getKademliaRepository().get(key));
+            return;
+        }
+        switch (somniaDocument.type()){
+            case HIT:
+                handleHitGet(caller, requester, key);
+                break;
+            case DISTRIBUTE:
+                handleDistributedGet(caller, requester, key);
+                break;
+        }
+    }
+
+    private void handleHitGet(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key) {
+        GetAnswer<BigInteger, SomniaKey, SomniaValue> getAnswer = getDataFromClosestNodes(requester, key, caller);
+        if(getAnswer == null)
+            getNodeConnectionApi().sendGetResults(this, requester, key, null);
+    }
+
+    private void handleDistributedGet(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key) {
+        key.setHitNode(null);
+        BigInteger hash = hash(key);
+        FindNodeAnswer<BigInteger, SomniaConnectionInfo> findNodeAnswer = getRoutingTable().findClosest(hash);
+        Date date = getDateOfSecondsAgo(LAST_SEEN_SECONDS_TO_CONSIDER_ALIVE);
+
+        /*
+         * Look for nodes with the data.
+         * From the second time we look through the alive close nodes, make sure number of times we look for it won't pass 1/4 of minimum distribution
+         */
+
+        boolean firstLoopDone = false;
+        for (ExternalNode<BigInteger, SomniaConnectionInfo> externalNode : findNodeAnswer.getNodes()) {
+            if(key.getDistributions() > (config.getMinimumDistribution() / 4) && firstLoopDone){
+                break;
+            }
+            if(firstLoopDone){
+                key.incrementDistribution();
+            }
+
+            if(externalNode.getId().equals(getId()) || (externalNode.getId().equals(caller.getId())))
+                continue;
+
+            PingAnswer<BigInteger> pingAnswer;
+            if(externalNode.getLastSeen().before(date) || (pingAnswer = getNodeConnectionApi().ping(this, externalNode)).isAlive()){
+                getNodeConnectionApi().getRequest(this, requester, externalNode, key);
+                firstLoopDone = true;
+            }else if(!pingAnswer.isAlive()){
+                getRoutingTable().delete(externalNode);
+            }
+        }
     }
 
     @Override
@@ -118,8 +182,6 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
 
     protected void distributeDataToOtherNodes(Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value, Node<BigInteger, SomniaConnectionInfo> nodeToIgnore){
         Date date = getDateOfSecondsAgo(LAST_SEEN_SECONDS_TO_CONSIDER_ALIVE);
-        StoreAnswer<BigInteger, SomniaKey> storeAnswer = null;
-
         FindNodeAnswer<BigInteger, SomniaConnectionInfo> findNodeAnswer = this.getRoutingTable().findClosest(hash(key));
 
         for (ExternalNode<BigInteger, SomniaConnectionInfo> externalNode : findNodeAnswer.getNodes()) {

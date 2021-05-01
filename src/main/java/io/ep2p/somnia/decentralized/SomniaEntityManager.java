@@ -7,5 +7,6 @@ import java.util.Optional;
 public interface SomniaEntityManager {
 
     Optional<SomniaDocument> getDocumentOfName(String name);
+    Class<?> getClassOfName(String name);
 
 }

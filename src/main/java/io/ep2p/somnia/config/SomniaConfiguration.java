@@ -2,7 +2,6 @@ package io.ep2p.somnia.config;
 
 import io.ep2p.somnia.config.properties.SomniaConfigurationProperties;
 import io.ep2p.somnia.decentralized.Config;
-import io.ep2p.somnia.decentralized.SomniaKademliaSyncRepositoryNode;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

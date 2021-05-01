@@ -45,7 +45,7 @@ public class SomniaKademliaRepository implements KademliaRepository<SomniaKey, S
 
     @Override
     public void remove(SomniaKey somniaKey) {
-        throw new RuntimeException(""); //todo: support multilingual
+        throw new RuntimeException("You can not remove a key from Somnia Repository. This is a dangerous operation and is not available on Somnia API.");
     }
 
     @Override

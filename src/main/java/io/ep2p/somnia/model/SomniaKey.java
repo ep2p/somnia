@@ -2,6 +2,7 @@ package io.ep2p.somnia.model;
 
 import lombok.*;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
 @Builder
@@ -9,7 +10,7 @@ import java.math.BigInteger;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class SomniaKey {
+public class SomniaKey implements Serializable {
     private BigInteger key;
     private String name;
     private BigInteger hash;

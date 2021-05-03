@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -13,7 +14,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SomniaValue {
-    private List<BigInteger> owners;
+public class SomniaValue implements Serializable {
     private JsonNode data;
+    @Builder.Default
+    private boolean exists = true;
 }

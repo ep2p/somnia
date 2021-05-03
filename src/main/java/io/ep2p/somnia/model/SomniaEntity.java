@@ -19,9 +19,4 @@ public abstract class SomniaEntity<D extends Serializable> {
     private D data;
     private BigInteger key;
     private Date creationDate;
-    private Set<BigInteger> owners = new HashSet<>();
-
-    public void addOwner(BigInteger owner){
-        this.owners.add(owner);
-    }
 }

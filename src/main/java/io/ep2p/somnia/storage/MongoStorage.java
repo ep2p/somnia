@@ -44,7 +44,10 @@ public class MongoStorage implements Storage {
 
     @Override
     public SomniaValue get(Class<? extends SomniaEntity<?>> classOfName, SomniaKey somniaKey) {
-        List<? extends SomniaEntity<?>> result = mongoTemplate.find(Query.query(Criteria.where("key").is(somniaKey.getKey())), classOfName);
+        Query baseQuery = Query.query(Criteria.where("key").is(somniaKey.getKey()));
+
+        long count = mongoTemplate.count(baseQuery, classOfName);
+        List<? extends SomniaEntity<?>> result = mongoTemplate.find(baseQuery, classOfName);
 
         List<Object> values = new ArrayList<>();
         result.forEach(somniaEntity -> {
@@ -53,6 +56,7 @@ public class MongoStorage implements Storage {
 
         JsonNode jsonNode = objectMapper.valueToTree(values);
         return SomniaValue.builder()
+                .count(count)
                 .data(jsonNode)
                 .exists(true)
                 .build();

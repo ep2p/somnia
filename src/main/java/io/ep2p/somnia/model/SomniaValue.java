@@ -15,6 +15,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SomniaValue implements Serializable {
+    @Builder.Default
+    private long count = 1;
     private JsonNode data;
     @Builder.Default
     private boolean exists = true;

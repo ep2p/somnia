@@ -6,7 +6,6 @@ import io.ep2p.somnia.model.SomniaEntity;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
 import lombok.SneakyThrows;
-import org.bson.Document;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -42,14 +41,6 @@ public class MongoStorage implements Storage {
         }
         mongoTemplate.save(somniaEntity);
     }
-
-    /*public static void main(String[] args) {
-        System.out.println(Criteria.where("key").is("value")
-                .and("int").is(0)
-                .and("z").gte(1000)
-                .getCriteriaObject().toJson());
-
-    }*/
 
     @Override
     public SomniaValue get(Class<? extends SomniaEntity<?>> classOfName, SomniaKey somniaKey) {

@@ -25,6 +25,7 @@ public class SomniaKey implements Serializable {
 
     @Data
     @Builder
+    @AllArgsConstructor
     @NoArgsConstructor
     public static class Meta {
         private int offset = 0;

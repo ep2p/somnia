@@ -1,11 +1,15 @@
 package io.ep2p.somnia.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.ep2p.kademlia.connection.NodeConnectionApi;
+import com.github.ep2p.kademlia.node.KademliaRepository;
+import com.github.ep2p.kademlia.table.Bucket;
+import com.github.ep2p.kademlia.table.RoutingTable;
 import io.ep2p.somnia.config.properties.SomniaConfigurationProperties;
-import io.ep2p.somnia.decentralized.Config;
-import io.ep2p.somnia.decentralized.DefaultSomniaEntityManager;
-import io.ep2p.somnia.decentralized.SomniaEntityManager;
-import io.ep2p.somnia.decentralized.SomniaKademliaSyncRepositoryNode;
+import io.ep2p.somnia.decentralized.*;
+import io.ep2p.somnia.model.SomniaConnectionInfo;
+import io.ep2p.somnia.model.SomniaKey;
+import io.ep2p.somnia.model.SomniaValue;
 import io.ep2p.somnia.storage.DefaultInMemoryStorage;
 import io.ep2p.somnia.storage.MongoStorage;
 import io.ep2p.somnia.storage.Storage;
@@ -14,10 +18,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.data.mongodb.MongoDatabaseFactory;
-import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+
+import java.math.BigInteger;
 
 @Configuration
 @EnableConfigurationProperties({SomniaConfigurationProperties.class})
@@ -57,10 +61,24 @@ public class SomniaConfiguration {
         return new DefaultSomniaEntityManager();
     }
 
-    /*@Bean()
-    @DependsOn({"somniaEntityManager", "somniaDecentralizedConfig"})
-    public SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode(SomniaEntityManager somniaEntityManager, Config somniaDecentralizedConfig){
-        return new SomniaKademliaSyncRepositoryNode()
-    }*/
+    @Bean("somniaKademliaRepository")
+    @ConditionalOnMissingBean(name = "somniaKademliaRepository")
+    @DependsOn({"somniaEntityManager", "mongoStorage", "inMemoryStorage"})
+    public KademliaRepository<SomniaKey, SomniaValue> kademliaRepository(SomniaEntityManager somniaEntityManager, Storage mongoStorage, Storage inMemoryStorage){
+        return new SomniaKademliaRepository(somniaEntityManager, inMemoryStorage, mongoStorage)
+    }
+
+    @Bean("somniaKademliaSyncRepositoryNode")
+    @DependsOn({"somniaNodeId", "routingTable", "somniaConnectionInfo", "nodeConnectionApi", "somniaKademliaRepository", "somniaEntityManager", "somniaDecentralizedConfig"})
+    @ConditionalOnMissingBean(name = "somniaKademliaSyncRepositoryNode", value = SomniaKademliaSyncRepositoryNode.class)
+    public SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode(
+            BigInteger somniaNodeId,
+            RoutingTable<BigInteger, SomniaConnectionInfo, Bucket<BigInteger, SomniaConnectionInfo>> routingTable,
+            SomniaConnectionInfo somniaConnectionInfo,
+            NodeConnectionApi<BigInteger, SomniaConnectionInfo> nodeConnectionApi,
+            KademliaRepository<SomniaKey, SomniaValue> kademliaRepository,
+            SomniaEntityManager somniaEntityManager, Config somniaDecentralizedConfig){
+        return new SomniaKademliaSyncRepositoryNode(somniaNodeId, routingTable, nodeConnectionApi, somniaConnectionInfo,  kademliaRepository, somniaEntityManager, somniaDecentralizedConfig);
+    }
 
 }

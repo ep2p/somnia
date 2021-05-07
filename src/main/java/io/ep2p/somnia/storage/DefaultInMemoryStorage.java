@@ -12,12 +12,12 @@ public class DefaultInMemoryStorage implements Storage {
     private final Map<BigInteger, SomniaValue> map = new ConcurrentHashMap<>();
 
     @Override
-    public void store(Class<? extends SomniaEntity<?>> classOfName, boolean uniqueKey, SomniaKey somniaKey, SomniaValue somniaValue) {
+    public void store(Class<? extends SomniaEntity> classOfName, boolean uniqueKey, SomniaKey somniaKey, SomniaValue somniaValue) {
         this.map.putIfAbsent(somniaKey.getKey(), somniaValue);
     }
 
     @Override
-    public SomniaValue get(Class<? extends SomniaEntity<?>> classOfName, SomniaKey somniaKey) {
+    public SomniaValue get(Class<? extends SomniaEntity> classOfName, SomniaKey somniaKey) {
         SomniaValue somniaValue = this.map.get(somniaKey.getKey());
 
         if (somniaValue != null)
@@ -29,7 +29,7 @@ public class DefaultInMemoryStorage implements Storage {
     }
 
     @Override
-    public boolean contains(Class<? extends SomniaEntity<?>> classOfName, SomniaKey somniaKey) {
+    public boolean contains(Class<? extends SomniaEntity> classOfName, SomniaKey somniaKey) {
         return this.map.containsKey(somniaKey.getKey());
     }
 }

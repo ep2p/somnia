@@ -8,27 +8,34 @@ import java.util.Map;
 import java.util.Optional;
 
 public class DefaultSomniaEntityManager implements SomniaEntityManager {
-    private final Map<String, SomniaEntity<?>> registry = new HashMap<>();
+    private final Map<String, Class<? extends SomniaEntity>> registry = new HashMap<>();
 
     @Override
-    public void register(SomniaEntity<?> somniaEntity) {
-        registry.putIfAbsent(somniaEntity.getClass().getName(), somniaEntity);
+    public void register(Class<? extends SomniaEntity> somniaEntityClass) {
+        registry.putIfAbsent(somniaEntityClass.getName(), somniaEntityClass);
     }
 
     @Override
     public Optional<SomniaDocument> getDocumentOfName(String name) {
-        SomniaEntity<?> somniaEntity = registry.get(name);
-        if (somniaEntity != null){
-            return Optional.of(somniaEntity.getSomniaDocument());
+        Class<? extends SomniaEntity> somniaEntityClass = registry.get(name);
+        if (somniaEntityClass != null){
+            return Optional.of(getSomniaDocument(somniaEntityClass));
         }
         return Optional.empty();
     }
 
     @Override
-    public Class<? extends SomniaEntity<?>> getClassOfName(String name) throws ClassNotFoundException {
+    public Class<? extends SomniaEntity> getClassOfName(String name) throws ClassNotFoundException {
         if (registry.containsKey(name)){
-            return (Class<? extends SomniaEntity<?>>) registry.get(name).getClass();
+            return registry.get(name);
         }
         throw new ClassNotFoundException("Could not find SomniaEntity class of name '" + name + "'");
+    }
+
+    private SomniaDocument getSomniaDocument(Class<?> aClass){
+        SomniaDocument somniaDocument = aClass.getAnnotation(SomniaDocument.class);
+        if (somniaDocument == null)
+            throw new RuntimeException("SomniaEntity sub-class should be marked as @SomniaDocument");
+        return somniaDocument;
     }
 }

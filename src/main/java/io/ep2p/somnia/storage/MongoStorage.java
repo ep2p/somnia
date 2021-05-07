@@ -28,7 +28,7 @@ public class MongoStorage implements Storage {
 
     @SneakyThrows
     @Override
-    public void store(Class<? extends SomniaEntity<?>> classOfName, boolean uniqueKey, SomniaKey somniaKey, SomniaValue somniaValue) {
+    public void store(Class<? extends SomniaEntity> classOfName, boolean uniqueKey, SomniaKey somniaKey, SomniaValue somniaValue) {
         SomniaEntity somniaEntity = classOfName.newInstance();
         Object o = objectMapper.readValue(somniaValue.toString(), somniaEntity.getListenerMessageBodyClassType(0));
         somniaEntity.setData((Serializable) o);
@@ -44,7 +44,7 @@ public class MongoStorage implements Storage {
     }
 
     @Override
-    public SomniaValue get(Class<? extends SomniaEntity<?>> classOfName, SomniaKey somniaKey) {
+    public SomniaValue get(Class<? extends SomniaEntity> classOfName, SomniaKey somniaKey) {
         Query baseQuery = QueryUtil.generateQuery(somniaKey);
 
         long count = mongoTemplate.count(baseQuery, classOfName);
@@ -52,7 +52,7 @@ public class MongoStorage implements Storage {
         baseQuery.skip(somniaKey.getMeta().getOffset());
         baseQuery.limit(somniaKey.getMeta().getLimit());
 
-        List<? extends SomniaEntity<?>> result = mongoTemplate.find(baseQuery, classOfName);
+        List<? extends SomniaEntity> result = mongoTemplate.find(baseQuery, classOfName);
 
         List<Object> values = new ArrayList<>();
         result.forEach(somniaEntity -> {
@@ -68,7 +68,7 @@ public class MongoStorage implements Storage {
     }
 
     @Override
-    public boolean contains(Class<? extends SomniaEntity<?>> classOfName, SomniaKey somniaKey) {
+    public boolean contains(Class<? extends SomniaEntity> classOfName, SomniaKey somniaKey) {
         return mongoTemplate.exists(Query.query(Criteria.where("key").is(somniaKey.getKeyAsString())), classOfName);
     }
 }

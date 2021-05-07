@@ -13,12 +13,12 @@ public class QueryUtil {
             Document passedQueryDocument = Document.parse(somniaKey.getMeta().getQuery());
 
             Document document = new Document();
-            document.put("key", somniaKey.getKey());
+            document.put("key", somniaKey.getKeyAsString());
             passedQueryDocument.forEach(document::put);
 
             query = new BasicQuery(document);
         }else {
-            query = new Query(Criteria.where("key").is(somniaKey.getKey()));
+            query = new Query(Criteria.where("key").is(somniaKey.getKeyAsString()));
         }
         return query;
     }

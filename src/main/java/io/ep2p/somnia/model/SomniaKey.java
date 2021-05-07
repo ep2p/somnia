@@ -32,4 +32,11 @@ public class SomniaKey implements Serializable {
         private int limit = 20;
         private String query;
     }
+
+    public String getKeyAsString(){
+        BigInteger key = getKey();
+        if (key != null)
+            return key.toString();
+        return "";
+    }
 }

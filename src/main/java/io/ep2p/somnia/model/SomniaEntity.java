@@ -24,7 +24,7 @@ public abstract class SomniaEntity<D extends Serializable> implements GenericObj
     @Id
     private ObjectId id;
     private D data;
-    private BigInteger key;
+    private String key;
     private Date creationDate;
 
     public SomniaDocument getSomniaDocument(){

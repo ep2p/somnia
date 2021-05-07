@@ -32,7 +32,7 @@ public class MongoStorage implements Storage {
         SomniaEntity somniaEntity = classOfName.newInstance();
         Object o = objectMapper.readValue(somniaValue.toString(), somniaEntity.getListenerMessageBodyClassType(0));
         somniaEntity.setData((Serializable) o);
-        somniaEntity.setKey(somniaKey.getKey());
+        somniaEntity.setKey(somniaKey.getKeyAsString());
         somniaEntity.setCreationDate(new Date());
         if (uniqueKey){
             try {
@@ -69,6 +69,6 @@ public class MongoStorage implements Storage {
 
     @Override
     public boolean contains(Class<? extends SomniaEntity<?>> classOfName, SomniaKey somniaKey) {
-        return mongoTemplate.exists(Query.query(Criteria.where("key").is(somniaKey.getKey())), classOfName);
+        return mongoTemplate.exists(Query.query(Criteria.where("key").is(somniaKey.getKeyAsString())), classOfName);
     }
 }

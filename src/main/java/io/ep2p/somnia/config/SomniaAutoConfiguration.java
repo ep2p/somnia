@@ -65,7 +65,7 @@ public class SomniaAutoConfiguration {
     @ConditionalOnMissingBean(name = "somniaKademliaRepository")
     @DependsOn({"somniaEntityManager", "mongoStorage", "inMemoryStorage"})
     public KademliaRepository<SomniaKey, SomniaValue> kademliaRepository(SomniaEntityManager somniaEntityManager, Storage mongoStorage, Storage inMemoryStorage){
-        return new SomniaKademliaRepository(somniaEntityManager, inMemoryStorage, mongoStorage)
+        return new SomniaKademliaRepository(somniaEntityManager, inMemoryStorage, mongoStorage);
     }
 
     @Bean("somniaKademliaSyncRepositoryNode")

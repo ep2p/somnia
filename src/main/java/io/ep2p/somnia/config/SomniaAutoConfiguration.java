@@ -26,7 +26,7 @@ import java.math.BigInteger;
 @Configuration
 @EnableConfigurationProperties({SomniaConfigurationProperties.class})
 @EnableMongoRepositories
-public class SomniaConfiguration {
+public class SomniaAutoConfiguration {
 
     @Bean("objectMapper")
     @ConditionalOnMissingBean(ObjectMapper.class)

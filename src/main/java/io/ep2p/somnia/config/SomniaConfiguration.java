@@ -3,6 +3,9 @@ package io.ep2p.somnia.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ep2p.somnia.config.properties.SomniaConfigurationProperties;
 import io.ep2p.somnia.decentralized.Config;
+import io.ep2p.somnia.decentralized.DefaultSomniaEntityManager;
+import io.ep2p.somnia.decentralized.SomniaEntityManager;
+import io.ep2p.somnia.decentralized.SomniaKademliaSyncRepositoryNode;
 import io.ep2p.somnia.storage.DefaultInMemoryStorage;
 import io.ep2p.somnia.storage.MongoStorage;
 import io.ep2p.somnia.storage.Storage;
@@ -48,11 +51,15 @@ public class SomniaConfiguration {
         return new DefaultInMemoryStorage();
     }
 
-    //todo: SomniaEntityManager bean
+    @Bean("somniaEntityManager")
+    @ConditionalOnMissingBean(SomniaEntityManager.class)
+    public SomniaEntityManager somniaEntityManager(){
+        return new DefaultSomniaEntityManager();
+    }
 
     /*@Bean()
     @DependsOn({"somniaEntityManager", "somniaDecentralizedConfig"})
-    public SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode(){
+    public SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode(SomniaEntityManager somniaEntityManager, Config somniaDecentralizedConfig){
         return new SomniaKademliaSyncRepositoryNode()
     }*/
 

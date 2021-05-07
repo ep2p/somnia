@@ -7,7 +7,8 @@ import java.util.Optional;
 
 public interface SomniaEntityManager {
 
+    void register(SomniaEntity<?> somniaEntity);
     Optional<SomniaDocument> getDocumentOfName(String name);
-    Class<? extends SomniaEntity<?>> getClassOfName(String name);
+    Class<? extends SomniaEntity<?>> getClassOfName(String name) throws ClassNotFoundException;
 
 }

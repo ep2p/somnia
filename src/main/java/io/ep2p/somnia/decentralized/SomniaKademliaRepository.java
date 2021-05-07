@@ -5,6 +5,7 @@ import io.ep2p.somnia.annotation.SomniaDocument;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
 import io.ep2p.somnia.storage.Storage;
+import lombok.SneakyThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ public class SomniaKademliaRepository implements KademliaRepository<SomniaKey, S
         this.mongoStorage = mongoStorage;
     }
 
-
+    @SneakyThrows
     @Override
     public void store(SomniaKey somniaKey, SomniaValue somniaValue) {
         SomniaDocument somniaDocument = somniaEntityManager.getDocumentOfName(somniaKey.getName()).get();
@@ -31,6 +32,7 @@ public class SomniaKademliaRepository implements KademliaRepository<SomniaKey, S
         }
     }
 
+    @SneakyThrows
     @Override
     public SomniaValue get(SomniaKey somniaKey) {
         SomniaDocument somniaDocument = somniaEntityManager.getDocumentOfName(somniaKey.getName()).get();
@@ -46,6 +48,7 @@ public class SomniaKademliaRepository implements KademliaRepository<SomniaKey, S
         throw new RuntimeException("You can not remove a key from Somnia Repository. This is a dangerous operation and is not available on Somnia API.");
     }
 
+    @SneakyThrows
     @Override
     public boolean contains(SomniaKey somniaKey) {
         SomniaDocument somniaDocument = somniaEntityManager.getDocumentOfName(somniaKey.getName()).get();

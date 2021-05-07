@@ -5,11 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ep2p.somnia.model.SomniaEntity;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
+import io.ep2p.somnia.util.QueryUtil;
 import lombok.SneakyThrows;
-import org.bson.Document;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -46,18 +45,7 @@ public class MongoStorage implements Storage {
 
     @Override
     public SomniaValue get(Class<? extends SomniaEntity<?>> classOfName, SomniaKey somniaKey) {
-        Query baseQuery;
-        if(somniaKey.getMeta().getQuery() != null){
-            Document passedQueryDocument = Document.parse(somniaKey.getMeta().getQuery());
-
-            Document document = new Document();
-            document.put("key", somniaKey.getKey());
-            passedQueryDocument.forEach(document::put);
-
-            baseQuery = new BasicQuery(document);
-        }else {
-            baseQuery = new Query(Criteria.where("key").is(somniaKey.getKey()));
-        }
+        Query baseQuery = QueryUtil.generateQuery(somniaKey);
 
         long count = mongoTemplate.count(baseQuery, classOfName);
 

@@ -11,11 +11,21 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
+import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @Configuration
 @EnableConfigurationProperties({SomniaConfigurationProperties.class})
+@EnableMongoRepositories
 public class SomniaConfiguration {
+
+    @Bean("objectMapper")
+    @ConditionalOnMissingBean(ObjectMapper.class)
+    public ObjectMapper objectMapper(){
+        return new ObjectMapper();
+    }
 
     @Bean("somniaDecentralizedConfig")
     @DependsOn("somniaConfigurationProperties")

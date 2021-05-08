@@ -4,7 +4,8 @@ import com.github.ep2p.kademlia.connection.NodeConnectionApi;
 import com.github.ep2p.kademlia.table.BigIntegerRoutingTable;
 import com.github.ep2p.kademlia.table.Bucket;
 import com.github.ep2p.kademlia.table.RoutingTable;
-import io.ep2p.somnia.config.properties.SomniaConfigurationProperties;
+import io.ep2p.somnia.config.properties.SomniaBaseConfigProperties;
+import io.ep2p.somnia.config.properties.SomniaDecentralizedConfigProperties;
 import io.ep2p.somnia.model.SomniaConnectionInfo;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -16,9 +17,14 @@ import java.math.BigInteger;
 @EnableAutoConfiguration
 public class SomniaTestConfiguration {
 
-    @Bean
-    public SomniaConfigurationProperties somniaConfigurationProperties(){
-        return new SomniaConfigurationProperties();
+    @Bean("somniaDecentralizedConfigProperties")
+    public SomniaDecentralizedConfigProperties decentralizedConfigProperties(){
+        return new SomniaDecentralizedConfigProperties();
+    }
+
+    @Bean("somniaBaseConfigProperties")
+    public SomniaBaseConfigProperties somniaBaseConfigProperties(){
+        return SomniaBaseConfigProperties.builder().basePackage("io.ep2p.somnia").build();
     }
 
     @Bean

@@ -5,27 +5,28 @@ import com.github.ep2p.kademlia.connection.NodeConnectionApi;
 import com.github.ep2p.kademlia.node.KademliaRepository;
 import com.github.ep2p.kademlia.table.Bucket;
 import com.github.ep2p.kademlia.table.RoutingTable;
-import io.ep2p.somnia.config.properties.SomniaConfigurationProperties;
+import io.ep2p.somnia.config.properties.SomniaBaseConfigProperties;
+import io.ep2p.somnia.config.properties.SomniaDecentralizedConfigProperties;
 import io.ep2p.somnia.decentralized.*;
 import io.ep2p.somnia.model.SomniaConnectionInfo;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
+import io.ep2p.somnia.service.ApplicationStartupListener;
 import io.ep2p.somnia.storage.DefaultInMemoryStorage;
 import io.ep2p.somnia.storage.MongoStorage;
 import io.ep2p.somnia.storage.Storage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import java.math.BigInteger;
 
 @Configuration
-@EnableConfigurationProperties({SomniaConfigurationProperties.class})
+@EnableConfigurationProperties({SomniaBaseConfigProperties.class, SomniaDecentralizedConfigProperties.class})
 @EnableMongoRepositories
+@Import(ApplicationStartupListener.class)
 public class SomniaAutoConfiguration {
 
     @Bean("objectMapper")
@@ -35,10 +36,10 @@ public class SomniaAutoConfiguration {
     }
 
     @Bean("somniaDecentralizedConfig")
-    @DependsOn("somniaConfigurationProperties")
-    public Config somniaDecentralizedConfig(SomniaConfigurationProperties somniaConfigurationProperties){
+    @DependsOn("somniaDecentralizedConfigProperties")
+    public Config somniaDecentralizedConfig(SomniaDecentralizedConfigProperties somniaDecentralizedConfigProperties){
         return Config.builder()
-                .minimumDistribution(somniaConfigurationProperties.getMinimumDistribution())
+                .minimumDistribution(somniaDecentralizedConfigProperties.getMinimumDistribution())
                 .build();
     }
 

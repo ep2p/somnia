@@ -8,5 +8,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 @Setter
 public class SomniaConfigurationProperties {
-    private int minimumDistribtion;
+    private int minimumDistribution;
 }

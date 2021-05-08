@@ -1,9 +1,6 @@
 package io.ep2p.somnia.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 
@@ -17,6 +14,8 @@ import java.util.Date;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"creationDate", "id"})
+@ToString
 public abstract class SomniaEntity<D extends Serializable> implements GenericObj {
     @Id
     private ObjectId id;

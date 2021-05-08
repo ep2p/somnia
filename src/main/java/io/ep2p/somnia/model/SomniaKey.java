@@ -17,6 +17,7 @@ public class SomniaKey implements Serializable {
     private BigInteger hitNode;
     @Builder.Default
     private int distributions = 0;
+    @Builder.Default
     private Meta meta = new Meta();
 
     public synchronized void incrementDistribution(){

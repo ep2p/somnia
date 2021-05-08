@@ -36,7 +36,6 @@ import java.util.List;
 @ActiveProfiles({"default", "test"})
 @Slf4j
 public class MongoStorageTest {
-    //todo: add tests to check data uniqueness and meta query
 
     @Autowired
     MongoTemplate mongoTemplate;

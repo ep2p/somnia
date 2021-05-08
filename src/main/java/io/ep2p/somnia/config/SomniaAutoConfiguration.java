@@ -38,7 +38,7 @@ public class SomniaAutoConfiguration {
     @DependsOn("somniaConfigurationProperties")
     public Config somniaDecentralizedConfig(SomniaConfigurationProperties somniaConfigurationProperties){
         return Config.builder()
-                .minimumDistribution(somniaConfigurationProperties.getMinimumDistribtion())
+                .minimumDistribution(somniaConfigurationProperties.getMinimumDistribution())
                 .build();
     }
 

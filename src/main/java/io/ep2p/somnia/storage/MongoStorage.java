@@ -30,7 +30,7 @@ public class MongoStorage implements Storage {
     @Override
     public void store(Class<? extends SomniaEntity> classOfName, boolean uniqueKey, SomniaKey somniaKey, SomniaValue somniaValue) {
         SomniaEntity somniaEntity = classOfName.newInstance();
-        Object o = objectMapper.readValue(somniaValue.toString(), somniaEntity.getListenerMessageBodyClassType(0));
+        Object o = objectMapper.readValue(somniaValue.getData().toString(), somniaEntity.getGenericClassType(0));
         somniaEntity.setData((Serializable) o);
         somniaEntity.setKey(somniaKey.getKeyAsString());
         somniaEntity.setCreationDate(new Date());

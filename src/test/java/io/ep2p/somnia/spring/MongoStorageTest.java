@@ -14,6 +14,7 @@ import io.ep2p.somnia.spring.configuration.LocalNodeConnectionApi;
 import io.ep2p.somnia.spring.configuration.SomniaTestConfiguration;
 import io.ep2p.somnia.spring.mock.SampleData;
 import io.ep2p.somnia.spring.mock.SampleSomniaEntity;
+import io.ep2p.somnia.spring.mock.SampleSomniaEntity2;
 import io.ep2p.somnia.storage.MongoStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -155,6 +156,34 @@ public class MongoStorageTest {
         SomniaValue somniaValue = mongoStorage.get(SampleSomniaEntity.class, somniaKey);
         Assertions.assertEquals(1, somniaValue.getCount());
         Assertions.assertEquals(1, somniaValue.getData().size());
+    }
+
+    @Test
+    public void testNoneUniqueStore(){
+        SampleData sampleData = SampleData.builder()
+                .integerVal(1)
+                .stringVal("hey")
+                .build();
+
+        JsonNode jsonNode = objectMapper.valueToTree(sampleData);
+
+        SomniaKey somniaKey = SomniaKey.builder()
+                .key(BigInteger.valueOf(4000))
+                .build();
+
+        mongoStorage.store(SampleSomniaEntity2.class, true, somniaKey,
+                SomniaValue.builder()
+                        .data(jsonNode)
+                        .build());
+
+        mongoStorage.store(SampleSomniaEntity2.class, true, somniaKey,
+                SomniaValue.builder()
+                        .data(jsonNode)
+                        .build());
+
+        SomniaValue somniaValue = mongoStorage.get(SampleSomniaEntity2.class, somniaKey);
+        Assertions.assertEquals(2, somniaValue.getCount());
+        Assertions.assertEquals(2, somniaValue.getData().size());
     }
 
 }

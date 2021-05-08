@@ -20,9 +20,12 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -47,7 +50,9 @@ public class MongoStorageTest {
                       @Autowired SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode){
         log.info("Setting up the test");
         log.info("Dropping all collection");
-        mongoTemplate.getCollectionNames().forEach(mongoTemplate::dropCollection);
+        mongoTemplate.getCollectionNames().forEach(collectionName -> {
+            mongoTemplate.remove(new Query(), collectionName);
+        });
         ((LocalNodeConnectionApi<BigInteger>) nodeConnectionApi).registerNode(somniaKademliaSyncRepositoryNode);
         this.mongoStorage = new MongoStorage(mongoTemplate, objectMapper);
         this.objectMapper = objectMapper;
@@ -122,6 +127,34 @@ public class MongoStorageTest {
         boolean contains = mongoStorage.contains(SampleSomniaEntity.class, somniaKey);
         Assertions.assertTrue(contains);
         log.info("Passed contains() test");
+    }
+
+    @Test
+    public void testUniqueStore(){
+        SampleData sampleData = SampleData.builder()
+                .integerVal(1)
+                .stringVal("hey")
+                .build();
+
+        JsonNode jsonNode = objectMapper.valueToTree(sampleData);
+
+        SomniaKey somniaKey = SomniaKey.builder()
+                .key(BigInteger.valueOf(4000))
+                .build();
+
+        mongoStorage.store(SampleSomniaEntity.class, true, somniaKey,
+                SomniaValue.builder()
+                        .data(jsonNode)
+                        .build());
+
+        mongoStorage.store(SampleSomniaEntity.class, true, somniaKey,
+                SomniaValue.builder()
+                        .data(jsonNode)
+                        .build());
+
+        SomniaValue somniaValue = mongoStorage.get(SampleSomniaEntity.class, somniaKey);
+        Assertions.assertEquals(1, somniaValue.getCount());
+        Assertions.assertEquals(1, somniaValue.getData().size());
     }
 
 }

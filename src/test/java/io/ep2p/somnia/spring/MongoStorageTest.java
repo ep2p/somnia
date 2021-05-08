@@ -186,4 +186,34 @@ public class MongoStorageTest {
         Assertions.assertEquals(2, somniaValue.getData().size());
     }
 
+    @Test
+    public void testQuery(){
+        SomniaKey somniaKey = SomniaKey.builder()
+                .key(BigInteger.valueOf(5000))
+                .build();
+
+        SampleData sampleData = SampleData.builder()
+                .integerVal(1)
+                .stringVal("valid")
+                .build();
+        JsonNode jsonNode = objectMapper.valueToTree(sampleData);
+
+        mongoStorage.store(SampleSomniaEntity.class, true, somniaKey, SomniaValue.builder()
+                .data(jsonNode)
+                .build());
+
+        boolean contains = mongoStorage.contains(SampleSomniaEntity.class, somniaKey);
+        Assertions.assertTrue(contains);
+
+        somniaKey.getMeta().setQuery("{\"data.stringVal\": \"invalid\"}");
+        SomniaValue somniaValue = mongoStorage.get(SampleSomniaEntity.class, somniaKey);
+        Assertions.assertEquals(0, somniaValue.getCount());
+        Assertions.assertEquals(0, somniaValue.getData().size());
+
+        somniaKey.getMeta().setQuery("{\"data.stringVal\": \"valid\"}");
+        somniaValue = mongoStorage.get(SampleSomniaEntity.class, somniaKey);
+        Assertions.assertEquals(1, somniaValue.getCount());
+        Assertions.assertEquals(1, somniaValue.getData().size());
+    }
+
 }

@@ -17,6 +17,7 @@
     <name>Somnia Decentralized Storage Library</name>
     <description>Decentralized storage with private trust. Powered by Spring Boot, MongoDB and Kademlia algorithm.</description>
     <url>https://github.com/ep2p/somnia</url>
+    <packaging>jar</packaging>
 
     <licenses>
         <license>

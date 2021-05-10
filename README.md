@@ -14,3 +14,7 @@
 -------------------------------------------------------------
 ```
 
+Somnia is a small library to handle data distribution in a trusted (private) decentralized network. Using kademlia algorithm, Somnia is able to transfer data to a certain node on network or distribute it between many nodes.
+
+Somnia is strongly depended on **Spring Boot** and by default it uses **Mongo DB** as storage. Also, it's written on top of [ep2p/kademlia-api](https://github.com/ep2p/kademlia-api) and you'd need to understand the kademlia-api before using Somnia.
+

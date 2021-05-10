@@ -1,12 +1,12 @@
 package io.ep2p.somnia.spring.configuration;
 
+import com.github.ep2p.kademlia.connection.ConnectionInfo;
 import com.github.ep2p.kademlia.connection.NodeConnectionApi;
 import com.github.ep2p.kademlia.table.BigIntegerRoutingTable;
 import com.github.ep2p.kademlia.table.Bucket;
 import com.github.ep2p.kademlia.table.RoutingTable;
 import io.ep2p.somnia.config.properties.SomniaBaseConfigProperties;
 import io.ep2p.somnia.config.properties.SomniaDecentralizedConfigProperties;
-import io.ep2p.somnia.model.SomniaConnectionInfo;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -33,17 +33,17 @@ public class SomniaTestConfiguration {
     }
 
     @Bean
-    public RoutingTable<BigInteger, SomniaConnectionInfo, Bucket<BigInteger, SomniaConnectionInfo>> routingTable(BigInteger somniaNodeId){
+    public RoutingTable<BigInteger, ConnectionInfo, Bucket<BigInteger, ConnectionInfo>> routingTable(BigInteger somniaNodeId){
         return new BigIntegerRoutingTable<>(somniaNodeId);
     }
 
     @Bean
-    public SomniaConnectionInfo somniaConnectionInfo(){
-        return new SomniaConnectionInfo();
+    public ConnectionInfo connectionInfo(){
+        return new ConnectionInfo(){};
     }
 
     @Bean
-    public NodeConnectionApi<BigInteger, SomniaConnectionInfo> nodeConnectionApi(){
+    public NodeConnectionApi<BigInteger, ConnectionInfo> nodeConnectionApi(){
         return new LocalNodeConnectionApi<BigInteger>();
     }
 

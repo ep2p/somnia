@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.ep2p.kademlia.connection.ConnectionInfo;
 import com.github.ep2p.kademlia.connection.NodeConnectionApi;
 import io.ep2p.somnia.config.SomniaAutoConfiguration;
 import io.ep2p.somnia.decentralized.SomniaKademliaSyncRepositoryNode;
-import io.ep2p.somnia.model.SomniaConnectionInfo;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
 import io.ep2p.somnia.spring.configuration.LocalNodeConnectionApi;
@@ -44,7 +44,7 @@ public class MongoStorageTest {
 
     @BeforeEach
     public void setup(@Autowired MongoTemplate mongoTemplate, @Autowired ObjectMapper objectMapper,
-                      @Autowired NodeConnectionApi<BigInteger, SomniaConnectionInfo> nodeConnectionApi,
+                      @Autowired NodeConnectionApi<BigInteger, ConnectionInfo> nodeConnectionApi,
                       @Autowired SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode){
         log.info("Setting up the test");
         log.info("Dropping all collection");

@@ -1,6 +1,7 @@
 package io.ep2p.somnia.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.ep2p.kademlia.connection.ConnectionInfo;
 import com.github.ep2p.kademlia.connection.NodeConnectionApi;
 import com.github.ep2p.kademlia.node.KademliaRepository;
 import com.github.ep2p.kademlia.table.Bucket;
@@ -8,7 +9,6 @@ import com.github.ep2p.kademlia.table.RoutingTable;
 import io.ep2p.somnia.config.properties.SomniaBaseConfigProperties;
 import io.ep2p.somnia.config.properties.SomniaDecentralizedConfigProperties;
 import io.ep2p.somnia.decentralized.*;
-import io.ep2p.somnia.model.SomniaConnectionInfo;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
 import io.ep2p.somnia.service.ApplicationStartupListener;
@@ -73,16 +73,16 @@ public class SomniaAutoConfiguration {
     }
 
     @Bean("somniaKademliaSyncRepositoryNode")
-    @DependsOn({"somniaNodeId", "routingTable", "somniaConnectionInfo", "nodeConnectionApi", "somniaKademliaRepository", "somniaEntityManager", "somniaDecentralizedConfig"})
+    @DependsOn({"somniaNodeId", "routingTable", "connectionInfo", "nodeConnectionApi", "somniaKademliaRepository", "somniaEntityManager", "somniaDecentralizedConfig"})
     @ConditionalOnMissingBean(name = "somniaKademliaSyncRepositoryNode", value = SomniaKademliaSyncRepositoryNode.class)
     public SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode(
             BigInteger somniaNodeId,
-            RoutingTable<BigInteger, SomniaConnectionInfo, Bucket<BigInteger, SomniaConnectionInfo>> routingTable,
-            SomniaConnectionInfo somniaConnectionInfo,
-            NodeConnectionApi<BigInteger, SomniaConnectionInfo> nodeConnectionApi,
+            RoutingTable<BigInteger, ConnectionInfo, Bucket<BigInteger, ConnectionInfo>> routingTable,
+            ConnectionInfo connectionInfo,
+            NodeConnectionApi<BigInteger, ConnectionInfo> nodeConnectionApi,
             KademliaRepository<SomniaKey, SomniaValue> kademliaRepository,
             SomniaEntityManager somniaEntityManager, Config somniaDecentralizedConfig){
-        return new SomniaKademliaSyncRepositoryNode(somniaNodeId, routingTable, nodeConnectionApi, somniaConnectionInfo,  kademliaRepository, somniaEntityManager, somniaDecentralizedConfig);
+        return new SomniaKademliaSyncRepositoryNode(somniaNodeId, routingTable, nodeConnectionApi, connectionInfo,  kademliaRepository, somniaEntityManager, somniaDecentralizedConfig);
     }
 
 }

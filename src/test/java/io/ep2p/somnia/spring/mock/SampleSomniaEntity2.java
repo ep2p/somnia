@@ -4,6 +4,7 @@ import io.ep2p.somnia.annotation.SomniaDocument;
 import io.ep2p.somnia.model.EntityType;
 import io.ep2p.somnia.model.SomniaEntity;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -11,5 +12,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @SomniaDocument(type = EntityType.HIT)
 @Getter
 @Setter
+@NoArgsConstructor
 public class SampleSomniaEntity2 extends SomniaEntity<SampleData> {
 }

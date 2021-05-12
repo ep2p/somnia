@@ -17,6 +17,9 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Component
 @Slf4j
 public class ApplicationStartupListener {
@@ -34,17 +37,29 @@ public class ApplicationStartupListener {
     @SneakyThrows
     @EventListener
     public void handleApplicationStartup(ApplicationStartedEvent applicationStartedEvent){
-        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(true);
+        Set<String> packages = new HashSet<>();
 
+        if("".equals(somniaBaseConfigProperties.getBasePackage()) || somniaBaseConfigProperties.getBasePackage() != null){
+            packages.add(somniaBaseConfigProperties.getBasePackage());
+        }else {
+            applicationStartedEvent.getSpringApplication().getAllSources().forEach(o -> {
+                if (o instanceof Class){
+                    packages.add(((Class<?>) o).getPackage().getName());
+                }
+            });
+        }
+
+        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(true);
         scanner.addIncludeFilter(new AnnotationTypeFilter(SomniaDocument.class));
 
-        for (BeanDefinition bd : scanner.findCandidateComponents(somniaBaseConfigProperties.getBasePackage())){
-            Class<?> aClass = Class.forName(bd.getBeanClassName());
-
-            SomniaDocument somniaDocument = Class.forName(bd.getBeanClassName()).getAnnotation(SomniaDocument.class);
-            if (somniaDocument != null && aClass.isInstance(SomniaEntity.class)){
-                processMongo(somniaDocument, aClass);
-                processEntityManager(aClass);
+        for (String aPackage : packages) {
+            for (BeanDefinition bd : scanner.findCandidateComponents(aPackage)){
+                Class<?> aClass = Class.forName(bd.getBeanClassName());
+                SomniaDocument somniaDocument = aClass.getAnnotation(SomniaDocument.class);
+                if (somniaDocument != null){
+                    processMongo(somniaDocument, aClass);
+                    processEntityManager(aClass);
+                }
             }
         }
     }

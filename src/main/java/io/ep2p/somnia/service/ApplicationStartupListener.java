@@ -2,6 +2,8 @@ package io.ep2p.somnia.service;
 
 import io.ep2p.somnia.annotation.SomniaDocument;
 import io.ep2p.somnia.config.properties.SomniaBaseConfigProperties;
+import io.ep2p.somnia.decentralized.SomniaEntityManager;
+import io.ep2p.somnia.model.SomniaEntity;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +21,13 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ApplicationStartupListener {
     private final MongoTemplate mongoTemplate;
+    private final SomniaEntityManager somniaEntityManager;
     private final SomniaBaseConfigProperties somniaBaseConfigProperties;
 
     @Autowired
-    public ApplicationStartupListener(MongoTemplate mongoTemplate, SomniaBaseConfigProperties somniaBaseConfigProperties) {
+    public ApplicationStartupListener(MongoTemplate mongoTemplate, SomniaEntityManager somniaEntityManager, SomniaBaseConfigProperties somniaBaseConfigProperties) {
         this.mongoTemplate = mongoTemplate;
+        this.somniaEntityManager = somniaEntityManager;
         this.somniaBaseConfigProperties = somniaBaseConfigProperties;
     }
 
@@ -36,14 +40,20 @@ public class ApplicationStartupListener {
 
         for (BeanDefinition bd : scanner.findCandidateComponents(somniaBaseConfigProperties.getBasePackage())){
             Class<?> aClass = Class.forName(bd.getBeanClassName());
+
             SomniaDocument somniaDocument = Class.forName(bd.getBeanClassName()).getAnnotation(SomniaDocument.class);
-            if (somniaDocument != null){
-                process(somniaDocument, aClass);
+            if (somniaDocument != null && aClass.isInstance(SomniaEntity.class)){
+                processMongo(somniaDocument, aClass);
+                processEntityManager(aClass);
             }
         }
     }
 
-    private void process(SomniaDocument somniaDocument, Class<?> aClass){
+    private void processEntityManager(Class<?> aClass) {
+        somniaEntityManager.register((Class<SomniaEntity<?>>) aClass);
+    }
+
+    private void processMongo(SomniaDocument somniaDocument, Class<?> aClass){
         if (somniaDocument.inMemory())
             return;
         log.info("Processing key indexing for " + aClass);

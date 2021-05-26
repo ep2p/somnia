@@ -46,7 +46,7 @@ public class SomniaAutoConfiguration {
         return module;
     }
 
-    @Bean("objectMapper")
+    @Bean({"objectMapper", "somniaObjectMapper"})
     @DependsOn("somniaSimpleModule")
     @ConditionalOnMissingBean(ObjectMapper.class)
     public ObjectMapper objectMapper(SimpleModule somniaSimpleModule){

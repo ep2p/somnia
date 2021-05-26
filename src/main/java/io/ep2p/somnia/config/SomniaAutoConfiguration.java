@@ -1,13 +1,19 @@
 package io.ep2p.somnia.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.github.ep2p.kademlia.connection.NodeConnectionApi;
 import com.github.ep2p.kademlia.node.KademliaRepository;
+import com.github.ep2p.kademlia.node.external.ExternalNode;
 import com.github.ep2p.kademlia.table.Bucket;
 import com.github.ep2p.kademlia.table.RoutingTable;
 import io.ep2p.somnia.config.properties.SomniaBaseConfigProperties;
 import io.ep2p.somnia.config.properties.SomniaDecentralizedConfigProperties;
+import io.ep2p.somnia.config.serialization.ExternalNodeDeserializer;
+import io.ep2p.somnia.config.serialization.ExternalNodeSerializer;
 import io.ep2p.somnia.decentralized.*;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
@@ -32,10 +38,23 @@ import java.math.BigInteger;
 @Import(ApplicationStartupListener.class)
 public class SomniaAutoConfiguration {
 
+    @Bean("somniaSimpleModule")
+    public SimpleModule somniaSimpleModule(){
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(ExternalNode.class, new ExternalNodeSerializer());
+        module.addDeserializer(ExternalNode.class, new ExternalNodeDeserializer());
+        return module;
+    }
+
     @Bean("objectMapper")
+    @DependsOn("somniaSimpleModule")
     @ConditionalOnMissingBean(ObjectMapper.class)
-    public ObjectMapper objectMapper(){
-        return new ObjectMapper();
+    public ObjectMapper objectMapper(SimpleModule somniaSimpleModule){
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.registerModule(somniaSimpleModule);
+        return objectMapper;
     }
 
     @Bean("somniaDecentralizedConfig")

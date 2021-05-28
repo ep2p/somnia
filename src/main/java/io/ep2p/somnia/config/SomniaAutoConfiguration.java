@@ -73,8 +73,9 @@ public class SomniaAutoConfiguration {
 
     @Bean("inMemoryStorage")
     @ConditionalOnMissingBean(name = "inMemoryStorage")
-    public Storage inMemoryStorage(){
-        return new DefaultInMemoryStorage();
+    @DependsOn("objectMapper")
+    public Storage inMemoryStorage(ObjectMapper objectMapper){
+        return new DefaultInMemoryStorage(objectMapper);
     }
 
     @Bean("somniaEntityManager")

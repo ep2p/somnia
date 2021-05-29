@@ -13,7 +13,7 @@
 
     <groupId>io.ep2p</groupId>
     <artifactId>somnia</artifactId>
-    <version>0.2.4-RELEASE</version>
+    <version>0.2.5-SNAPSHOT</version>
     <name>Somnia Decentralized Storage Library</name>
     <description>Decentralized storage with private trust. Powered by Spring Boot, MongoDB and Kademlia algorithm.</description>
     <url>https://github.com/ep2p/somnia</url>

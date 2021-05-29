@@ -155,8 +155,10 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
     }
 
     private void handleHitStore(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {
-        if (getKademliaRepository().contains(key))
+        if (getKademliaRepository().contains(key)){
+            this.getNodeConnectionApi().sendStoreResults(this, requester, key, true);
             return;
+        }
         doStore(requester, key, value);
         distributeDataToOtherNodes(requester, key, value, caller);
     }

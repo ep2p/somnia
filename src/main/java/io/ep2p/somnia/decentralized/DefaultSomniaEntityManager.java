@@ -6,6 +6,7 @@ import io.ep2p.somnia.model.SomniaEntity;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class DefaultSomniaEntityManager implements SomniaEntityManager {
     private final Map<String, Class<? extends SomniaEntity>> registry = new HashMap<>();
@@ -13,6 +14,11 @@ public class DefaultSomniaEntityManager implements SomniaEntityManager {
     @Override
     public void register(Class<? extends SomniaEntity> somniaEntityClass) {
         registry.putIfAbsent(somniaEntityClass.getName(), somniaEntityClass);
+    }
+
+    @Override
+    public void register(String name, Class<? extends SomniaEntity> somniaEntityClass) {
+        registry.putIfAbsent(name, somniaEntityClass);
     }
 
     @Override
@@ -30,6 +36,11 @@ public class DefaultSomniaEntityManager implements SomniaEntityManager {
             return registry.get(name);
         }
         throw new ClassNotFoundException("Could not find SomniaEntity class of name '" + name + "'");
+    }
+
+    @Override
+    public Set<String> getNames() {
+        return registry.keySet();
     }
 
     private SomniaDocument getSomniaDocument(Class<?> aClass){

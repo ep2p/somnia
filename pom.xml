@@ -38,7 +38,7 @@
     <scm>
         <connection>scm:git:git://github.com/ep2p/somnia.git</connection>
         <developerConnection>scm:git:ssh://github.com:ep2p/somnia.git</developerConnection>
-        <url>http://github.com/ep2p/somnia/tree/master</url>
+        <url>http://github.com/ep2p/somnia/tree/main</url>
     </scm>
 
     <properties>

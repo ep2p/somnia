@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.ep2p.kademlia.node.external.BigIntegerExternalNode;
-import com.github.ep2p.kademlia.node.external.ExternalNode;
+import io.ep2p.kademlia.node.external.BigIntegerExternalNode;
+import io.ep2p.kademlia.node.external.ExternalNode;
 import io.ep2p.somnia.decentralized.SomniaConnectionInfo;
 
 import java.io.IOException;

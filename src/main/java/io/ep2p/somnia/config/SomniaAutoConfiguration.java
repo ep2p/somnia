@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.github.ep2p.kademlia.connection.NodeConnectionApi;
-import com.github.ep2p.kademlia.node.KademliaRepository;
-import com.github.ep2p.kademlia.node.external.ExternalNode;
-import com.github.ep2p.kademlia.table.Bucket;
-import com.github.ep2p.kademlia.table.RoutingTable;
+import io.ep2p.kademlia.connection.NodeConnectionApi;
+import io.ep2p.kademlia.node.KademliaRepository;
+import io.ep2p.kademlia.node.external.ExternalNode;
+import io.ep2p.kademlia.table.Bucket;
+import io.ep2p.kademlia.table.RoutingTable;
 import io.ep2p.somnia.config.properties.SomniaBaseConfigProperties;
 import io.ep2p.somnia.config.properties.SomniaDecentralizedConfigProperties;
 import io.ep2p.somnia.config.serialization.ExternalNodeDeserializer;

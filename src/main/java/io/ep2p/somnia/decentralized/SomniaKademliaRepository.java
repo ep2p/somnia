@@ -1,6 +1,6 @@
 package io.ep2p.somnia.decentralized;
 
-import com.github.ep2p.kademlia.node.KademliaRepository;
+import io.ep2p.kademlia.node.KademliaRepository;
 import io.ep2p.somnia.annotation.SomniaDocument;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;

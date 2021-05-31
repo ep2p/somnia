@@ -1,9 +1,9 @@
 package io.ep2p.somnia.spring.configuration;
 
-import com.github.ep2p.kademlia.connection.NodeConnectionApi;
-import com.github.ep2p.kademlia.table.BigIntegerRoutingTable;
-import com.github.ep2p.kademlia.table.Bucket;
-import com.github.ep2p.kademlia.table.RoutingTable;
+import io.ep2p.kademlia.connection.NodeConnectionApi;
+import io.ep2p.kademlia.table.BigIntegerRoutingTable;
+import io.ep2p.kademlia.table.Bucket;
+import io.ep2p.kademlia.table.RoutingTable;
 import io.ep2p.somnia.config.properties.SomniaBaseConfigProperties;
 import io.ep2p.somnia.config.properties.SomniaDecentralizedConfigProperties;
 import io.ep2p.somnia.decentralized.SomniaConnectionInfo;

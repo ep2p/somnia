@@ -1,16 +1,16 @@
 package io.ep2p.somnia.decentralized;
 
-import com.github.ep2p.kademlia.connection.NodeConnectionApi;
-import com.github.ep2p.kademlia.model.FindNodeAnswer;
-import com.github.ep2p.kademlia.model.GetAnswer;
-import com.github.ep2p.kademlia.model.PingAnswer;
-import com.github.ep2p.kademlia.model.StoreAnswer;
-import com.github.ep2p.kademlia.node.KademliaRepository;
-import com.github.ep2p.kademlia.node.KademliaSyncRepositoryNode;
-import com.github.ep2p.kademlia.node.Node;
-import com.github.ep2p.kademlia.node.external.ExternalNode;
-import com.github.ep2p.kademlia.table.Bucket;
-import com.github.ep2p.kademlia.table.RoutingTable;
+import io.ep2p.kademlia.connection.NodeConnectionApi;
+import io.ep2p.kademlia.model.FindNodeAnswer;
+import io.ep2p.kademlia.model.GetAnswer;
+import io.ep2p.kademlia.model.PingAnswer;
+import io.ep2p.kademlia.model.StoreAnswer;
+import io.ep2p.kademlia.node.KademliaRepository;
+import io.ep2p.kademlia.node.KademliaSyncRepositoryNode;
+import io.ep2p.kademlia.node.Node;
+import io.ep2p.kademlia.node.external.ExternalNode;
+import io.ep2p.kademlia.table.Bucket;
+import io.ep2p.kademlia.table.RoutingTable;
 import io.ep2p.somnia.annotation.SomniaDocument;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
@@ -20,8 +20,8 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.Optional;
 
-import static com.github.ep2p.kademlia.Common.LAST_SEEN_SECONDS_TO_CONSIDER_ALIVE;
-import static com.github.ep2p.kademlia.util.DateUtil.getDateOfSecondsAgo;
+import static io.ep2p.kademlia.Common.LAST_SEEN_SECONDS_TO_CONSIDER_ALIVE;
+import static io.ep2p.kademlia.util.DateUtil.getDateOfSecondsAgo;
 
 @Slf4j
 public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode<BigInteger, SomniaConnectionInfo, SomniaKey, SomniaValue> {

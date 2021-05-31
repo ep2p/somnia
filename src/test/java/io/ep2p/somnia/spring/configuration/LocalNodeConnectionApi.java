@@ -1,12 +1,12 @@
 package io.ep2p.somnia.spring.configuration;
 
-import com.github.ep2p.kademlia.connection.NodeConnectionApi;
-import com.github.ep2p.kademlia.exception.NodeIsOfflineException;
-import com.github.ep2p.kademlia.model.FindNodeAnswer;
-import com.github.ep2p.kademlia.model.PingAnswer;
-import com.github.ep2p.kademlia.node.KademliaNode;
-import com.github.ep2p.kademlia.node.KademliaRepositoryNode;
-import com.github.ep2p.kademlia.node.Node;
+import io.ep2p.kademlia.connection.NodeConnectionApi;
+import io.ep2p.kademlia.exception.NodeIsOfflineException;
+import io.ep2p.kademlia.model.FindNodeAnswer;
+import io.ep2p.kademlia.model.PingAnswer;
+import io.ep2p.kademlia.node.KademliaNode;
+import io.ep2p.kademlia.node.KademliaRepositoryNode;
+import io.ep2p.kademlia.node.Node;
 import io.ep2p.somnia.decentralized.SomniaConnectionInfo;
 import lombok.extern.slf4j.Slf4j;
 

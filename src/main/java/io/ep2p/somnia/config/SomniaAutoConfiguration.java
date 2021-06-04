@@ -17,12 +17,13 @@ import io.ep2p.somnia.config.serialization.ExternalNodeSerializer;
 import io.ep2p.somnia.decentralized.*;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
-import io.ep2p.somnia.service.ApplicationStartupListener;
+import io.ep2p.somnia.service.EntityManagerRegisterer;
 import io.ep2p.somnia.storage.DefaultInMemoryStorage;
 import io.ep2p.somnia.storage.MongoStorage;
 import io.ep2p.somnia.storage.Storage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -35,7 +36,7 @@ import java.math.BigInteger;
 @Configuration
 @EnableConfigurationProperties({SomniaBaseConfigProperties.class, SomniaDecentralizedConfigProperties.class})
 @EnableMongoRepositories
-@Import(ApplicationStartupListener.class)
+@Import(EntityManagerRegisterer.class)
 public class SomniaAutoConfiguration {
 
     @Bean("somniaSimpleModule")
@@ -102,6 +103,11 @@ public class SomniaAutoConfiguration {
             KademliaRepository<SomniaKey, SomniaValue> somniaKademliaRepository,
             SomniaEntityManager somniaEntityManager, Config somniaDecentralizedConfig){
         return new SomniaKademliaSyncRepositoryNode(somniaNodeId, routingTable, nodeConnectionApi, somniaConnectionInfo,  somniaKademliaRepository, somniaEntityManager, somniaDecentralizedConfig);
+    }
+
+    @Bean
+    public EntityManagerRegisterer entityManagerRegisterer(MongoTemplate mongoTemplate, SomniaEntityManager somniaEntityManager, SomniaBaseConfigProperties somniaBaseConfigProperties, ApplicationContext applicationContext){
+        return new EntityManagerRegisterer(mongoTemplate, somniaEntityManager, somniaBaseConfigProperties, applicationContext);
     }
 
 }

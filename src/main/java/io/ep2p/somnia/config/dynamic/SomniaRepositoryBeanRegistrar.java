@@ -1,6 +1,7 @@
 package io.ep2p.somnia.config.dynamic;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -14,7 +15,6 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
-import org.apache.commons.collections.MapUtils;
 
 @Slf4j
 @Configuration
@@ -24,7 +24,7 @@ public class SomniaRepositoryBeanRegistrar implements ImportBeanDefinitionRegist
 
     public SomniaRepositoryBeanRegistrar() {
         classpathScanner = new ClassPathScanner(false);
-        classpathScanner.addIncludeFilter(new AnnotationTypeFilter(SomniaRepository.class));
+        classpathScanner.addIncludeFilter(new AnnotationTypeFilter(DynamicRepository.class));
     }
 
     @Override
@@ -48,7 +48,7 @@ public class SomniaRepositoryBeanRegistrar implements ImportBeanDefinitionRegist
 
                 Class<?> clazz = Class.forName(beanDefinition.getBeanClassName());
 
-                SomniaRepository somniaRepository = clazz.getAnnotation(SomniaRepository.class);
+                DynamicRepository somniaRepository = clazz.getAnnotation(DynamicRepository.class);
 
                 String beanName = StringUtils.isNotEmpty(somniaRepository.bean())
                         ? somniaRepository.bean() : ClassUtils.getQualifiedName(clazz);

@@ -1,8 +1,8 @@
 package io.ep2p.somnia.spring.repository;
 
-import io.ep2p.somnia.config.dynamic.SomniaRepository;
+import io.ep2p.somnia.config.dynamic.DynamicRepository;
 
-@SomniaRepository
+@DynamicRepository
 public interface TestRepository {
     void dosomething();
 }

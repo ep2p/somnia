@@ -17,6 +17,7 @@ import io.ep2p.somnia.decentralized.*;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
 import io.ep2p.somnia.service.EntityManagerRegisterer;
+import io.ep2p.somnia.service.HashGenerator;
 import io.ep2p.somnia.storage.DefaultInMemoryStorage;
 import io.ep2p.somnia.storage.MongoStorage;
 import io.ep2p.somnia.storage.Storage;
@@ -102,6 +103,11 @@ public class SomniaAutoConfiguration {
             KademliaRepository<SomniaKey, SomniaValue> somniaKademliaRepository,
             SomniaEntityManager somniaEntityManager, Config somniaDecentralizedConfig){
         return new SomniaKademliaSyncRepositoryNode(somniaNodeId, routingTable, nodeConnectionApi, somniaConnectionInfo,  somniaKademliaRepository, somniaEntityManager, somniaDecentralizedConfig);
+    }
+
+    @Bean("somniaHashGenerator")
+    public HashGenerator hashGenerator(){
+        return new HashGenerator.DefaultHashGenerator();
     }
 
     @Bean

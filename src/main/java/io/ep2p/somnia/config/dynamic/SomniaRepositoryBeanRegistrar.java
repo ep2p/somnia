@@ -1,5 +1,6 @@
 package io.ep2p.somnia.config.dynamic;
 
+import io.ep2p.somnia.storage.SomniaRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -47,6 +48,10 @@ public class SomniaRepositoryBeanRegistrar implements ImportBeanDefinitionRegist
             for (BeanDefinition beanDefinition : classpathScanner.findCandidateComponents(basePackage)) {
 
                 Class<?> clazz = Class.forName(beanDefinition.getBeanClassName());
+
+                if (!clazz.isAssignableFrom(SomniaRepository.class)) {
+                    throw new IllegalAccessException("A @DynamicRepository should also implement SomniaRepository interface, but this one doesnt: " + clazz.getName());
+                }
 
                 DynamicRepository somniaRepository = clazz.getAnnotation(DynamicRepository.class);
 

@@ -29,7 +29,7 @@ public class SomniaKey implements Serializable {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Meta {
-        private int offset = 0;
+        private long offset = 0;
         private int limit = 20;
         private String query;
     }

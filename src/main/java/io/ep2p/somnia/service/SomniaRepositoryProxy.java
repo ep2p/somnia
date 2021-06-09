@@ -10,10 +10,7 @@ import io.ep2p.kademlia.model.GetAnswer;
 import io.ep2p.kademlia.model.StoreAnswer;
 import io.ep2p.somnia.config.dynamic.DynamicRepository;
 import io.ep2p.somnia.decentralized.SomniaKademliaSyncRepositoryNode;
-import io.ep2p.somnia.model.GenericObj;
-import io.ep2p.somnia.model.SomniaEntity;
-import io.ep2p.somnia.model.SomniaKey;
-import io.ep2p.somnia.model.SomniaValue;
+import io.ep2p.somnia.model.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.query.Query;
@@ -59,7 +56,7 @@ public class SomniaRepositoryProxy extends AbstractInvocationHandler {
         throw new RuntimeException("Unknown method");
     }
 
-    private Object save(DynamicRepository dynamicRepository, Object proxy, BigInteger key, Serializable data) {
+    private RepositoryResponse<?> save(DynamicRepository dynamicRepository, Object proxy, BigInteger key, Serializable data) {
         Class<? extends SomniaEntity<?>> through = dynamicRepository.through();
         SomniaKey somniaKey = SomniaKey.builder()
                 .key(key)
@@ -72,23 +69,27 @@ public class SomniaRepositoryProxy extends AbstractInvocationHandler {
                 .data(objectMapper.valueToTree(data))
                 .build();
 
+        StoreAnswer<BigInteger, SomniaKey> storeAnswer = null;
         try {
-            StoreAnswer<BigInteger, SomniaKey> storeAnswer = this.somniaKademliaSyncRepositoryNode.store(somniaKey, somniaValue);
+            storeAnswer = this.somniaKademliaSyncRepositoryNode.store(somniaKey, somniaValue);
             StoreAnswer.Result result = storeAnswer.getResult();
             if (result == StoreAnswer.Result.FAILED || result == StoreAnswer.Result.TIMEOUT){
                 log.error("Failed to store data with key " + somniaKey + " result: " + result);
-                return false;
+                return RepositoryResponse.builder().build();
             }
         } catch (StoreException e) {
             log.error("Failed to store data into somnia", e);
-            return false;
+            return RepositoryResponse.builder().build();
         }
 
-        return true;
+        return RepositoryResponse.builder()
+                .success(true)
+                .node(storeAnswer.getNodeId())
+                .build();
     }
 
     @SneakyThrows
-    private List<?> find(DynamicRepository dynamicRepository, Object proxy, BigInteger key, Query query, long offset, int limit) {
+    private RepositoryResponse<?> find(DynamicRepository dynamicRepository, Object proxy, BigInteger key, Query query, long offset, int limit) {
         Class<? extends SomniaEntity<?>> through = dynamicRepository.through();
         SomniaKey somniaKey = SomniaKey.builder()
                 .key(key)
@@ -103,7 +104,7 @@ public class SomniaRepositoryProxy extends AbstractInvocationHandler {
     }
 
     @SneakyThrows
-    private List<?> findAll(DynamicRepository dynamicRepository, Object proxy, BigInteger key) {
+    private RepositoryResponse<?> findAll(DynamicRepository dynamicRepository, Object proxy, BigInteger key) {
         Class<? extends SomniaEntity<?>> through = dynamicRepository.through();
         SomniaKey somniaKey = SomniaKey.builder()
                 .key(key)
@@ -113,7 +114,7 @@ public class SomniaRepositoryProxy extends AbstractInvocationHandler {
     }
 
     @SneakyThrows
-    private Optional<?> findOne(DynamicRepository dynamicRepository, Object proxy, BigInteger key) {
+    private <E> RepositoryResponse<E> findOne(DynamicRepository dynamicRepository, Object proxy, BigInteger key) {
         Class<? extends SomniaEntity<?>> through = dynamicRepository.through();
         SomniaKey somniaKey = SomniaKey.builder()
                 .key(key)
@@ -123,18 +124,22 @@ public class SomniaRepositoryProxy extends AbstractInvocationHandler {
                         .limit(1)
                         .build())
                 .build();
-        List<?> objects = find(somniaKey, proxy);
-        return objects.size() > 0 ? Optional.of(objects.get(0)) : Optional.empty();
+        RepositoryResponse<E> repositoryResponse = (RepositoryResponse<E>) find(somniaKey, proxy);
+        if (repositoryResponse.isSuccess()) {
+            repositoryResponse.setResult(repositoryResponse.getResults().size() > 0 ? repositoryResponse.getResults().get(0): null);
+            repositoryResponse.setResults(null);
+        }
+        return repositoryResponse;
     }
 
-    private List<?> find(SomniaKey somniaKey, Object proxy) throws JsonProcessingException {
+    private RepositoryResponse<?> find(SomniaKey somniaKey, Object proxy) throws JsonProcessingException {
         GetAnswer<BigInteger, SomniaKey, SomniaValue> getAnswer = null;
         try {
             getAnswer = this.somniaKademliaSyncRepositoryNode.get(somniaKey);
             GetAnswer.Result result = getAnswer.getResult();
             if (result == GetAnswer.Result.FAILED || result == GetAnswer.Result.TIMEOUT){
                 log.error("Failed to find data with key " + somniaKey + " result: " + result);
-                return new ArrayList<>();
+                return RepositoryResponse.builder().build();
             }
         } catch (GetException e) {
             log.error("Failed to find data with key " + somniaKey, e);
@@ -142,7 +147,11 @@ public class SomniaRepositoryProxy extends AbstractInvocationHandler {
 
         assert getAnswer != null;
         JavaType type = this.objectMapper.getTypeFactory().constructCollectionType(List.class, ((GenericObj) proxy).getGenericClassType(1));
-        return this.objectMapper.readValue(getAnswer.getValue().toString(), type);
+        return RepositoryResponse.builder()
+                .node(getAnswer.getNodeId())
+                .results(this.objectMapper.readValue(getAnswer.getValue().toString(), type))
+                .success(true)
+                .build();
     }
 
 }

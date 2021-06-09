@@ -12,5 +12,5 @@ public interface SomniaRepository<D extends Serializable> extends GenericObj {
     boolean save(BigInteger id, D data);
     Optional<D> findOne(BigInteger id);
     List<D> findAll(BigInteger id);
-    List<D> find(BigInteger id, Query query);
+    List<D> find(BigInteger id, Query query, long offset, int limit);
 }

@@ -52,8 +52,9 @@ public class SomniaRepositoryProxy extends AbstractInvocationHandler {
                 assert args.length == 1 && args[0] instanceof BigInteger;
                 return findAll(dynamicRepository, proxy, (BigInteger) args[0]);
             case "find":
-                assert args.length == 2 && args[0] instanceof BigInteger && args[1] instanceof Query;
-                return find(dynamicRepository, proxy, (BigInteger) args[0], (Query) args[1]);
+                assert args.length == 4 && args[0] instanceof BigInteger && args[1] instanceof Query
+                        && args[2] instanceof Long && args[3] instanceof Integer;
+                return find(dynamicRepository, proxy, (BigInteger) args[0], (Query) args[1], (Long) args[2], (Integer) args[3]);
         }
         throw new RuntimeException("Unknown method");
     }
@@ -87,15 +88,15 @@ public class SomniaRepositoryProxy extends AbstractInvocationHandler {
     }
 
     @SneakyThrows
-    private List<?> find(DynamicRepository dynamicRepository, Object proxy, BigInteger key, Query query) {
+    private List<?> find(DynamicRepository dynamicRepository, Object proxy, BigInteger key, Query query, long offset, int limit) {
         Class<? extends SomniaEntity<?>> through = dynamicRepository.through();
         SomniaKey somniaKey = SomniaKey.builder()
                 .key(key)
                 .name(through.getName())
                 .meta(SomniaKey.Meta.builder()
                         .query(query.getQueryObject().toJson())
-                        .offset(query.getSkip())
-                        .limit(query.getLimit())
+                        .offset(offset)
+                        .limit(limit)
                         .build())
                 .build();
         return find(somniaKey, proxy);

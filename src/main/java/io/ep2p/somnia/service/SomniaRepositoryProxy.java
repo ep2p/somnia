@@ -9,7 +9,6 @@ import io.ep2p.kademlia.exception.StoreException;
 import io.ep2p.kademlia.model.GetAnswer;
 import io.ep2p.kademlia.model.StoreAnswer;
 import io.ep2p.somnia.config.dynamic.DynamicRepository;
-import io.ep2p.somnia.decentralized.SomniaEntityManager;
 import io.ep2p.somnia.decentralized.SomniaKademliaSyncRepositoryNode;
 import io.ep2p.somnia.model.GenericObj;
 import io.ep2p.somnia.model.SomniaEntity;
@@ -118,6 +117,10 @@ public class SomniaRepositoryProxy extends AbstractInvocationHandler {
         SomniaKey somniaKey = SomniaKey.builder()
                 .key(key)
                 .name(through.getName())
+                .meta(SomniaKey.Meta.builder()
+                        .offset(0)
+                        .limit(1)
+                        .build())
                 .build();
         List<?> objects = find(somniaKey, proxy);
         return objects.size() > 0 ? Optional.of(objects.get(0)) : Optional.empty();

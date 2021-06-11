@@ -171,7 +171,7 @@ public class SomniaRepositoryEnhancerFactory {
     private RepositoryResponse<?> find(SomniaKey somniaKey, Class<?> dataType) throws JsonProcessingException {
         GetAnswer<BigInteger, SomniaKey, SomniaValue> getAnswer = null;
         try {
-            getAnswer = this.somniaKademliaSyncRepositoryNode.get(somniaKey, 5, TimeUnit.SECONDS);
+            getAnswer = this.somniaKademliaSyncRepositoryNode.get(somniaKey, 30, TimeUnit.SECONDS);
             GetAnswer.Result result = getAnswer.getResult();
             if (result == GetAnswer.Result.FAILED || result == GetAnswer.Result.TIMEOUT){
                 log.error("Failed to find data with key " + somniaKey + " result: " + result);

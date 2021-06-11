@@ -49,7 +49,14 @@ public class SomniaRepositoryBeanRegistrar implements ImportBeanDefinitionRegist
 
                 Class<?> clazz = Class.forName(beanDefinition.getBeanClassName());
 
-                if (!clazz.isAssignableFrom(SomniaRepository.class)) {
+                boolean implementsSomniaRepository = false;
+                for (Class<?> anInterface : clazz.getInterfaces()) {
+                    if (anInterface.equals(SomniaRepository.class)){
+                        implementsSomniaRepository = true;
+                        break;
+                    }
+                }
+                if (!implementsSomniaRepository) {
                     throw new IllegalAccessException("A @DynamicRepository should also implement SomniaRepository interface, but this one doesnt: " + clazz.getName());
                 }
 

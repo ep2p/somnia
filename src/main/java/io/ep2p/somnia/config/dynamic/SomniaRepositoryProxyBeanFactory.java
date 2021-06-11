@@ -1,18 +1,16 @@
 package io.ep2p.somnia.config.dynamic;
 
-import io.ep2p.somnia.service.SomniaRepositoryProxy;
-
-import java.lang.reflect.Proxy;
+import io.ep2p.somnia.service.SomniaRepositoryEnhancerFactory;
 
 public class SomniaRepositoryProxyBeanFactory {
-    private final SomniaRepositoryProxy somniaRepositoryProxy;
+    private final SomniaRepositoryEnhancerFactory somniaRepositoryEnhancerFactory;
 
-    public SomniaRepositoryProxyBeanFactory(SomniaRepositoryProxy somniaRepositoryProxy) {
-        this.somniaRepositoryProxy = somniaRepositoryProxy;
+    public SomniaRepositoryProxyBeanFactory(SomniaRepositoryEnhancerFactory somniaRepositoryEnhancerFactory) {
+        this.somniaRepositoryEnhancerFactory = somniaRepositoryEnhancerFactory;
     }
 
     @SuppressWarnings("unchecked")
     public <PS> PS createSomniaRepositoryProxyBean(ClassLoader classLoader, Class<PS> clazz) {
-        return (PS) Proxy.newProxyInstance(classLoader, new Class[] {clazz}, somniaRepositoryProxy);
+        return this.somniaRepositoryEnhancerFactory.create(classLoader, clazz);
     }
 }

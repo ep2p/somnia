@@ -92,7 +92,7 @@ public class SomniaAutoConfiguration {
         return new SomniaKademliaRepository(somniaEntityManager, inMemoryStorage, mongoStorage);
     }
 
-    @Bean("somniaKademliaSyncRepositoryNode")
+    @Bean(value = "somniaKademliaSyncRepositoryNode", initMethod = "start")
     @DependsOn({"somniaNodeId", "routingTable", "somniaConnectionInfo", "nodeConnectionApi", "somniaKademliaRepository", "somniaEntityManager", "somniaDecentralizedConfig"})
     @ConditionalOnMissingBean(name = "somniaKademliaSyncRepositoryNode", value = SomniaKademliaSyncRepositoryNode.class)
     public SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode(

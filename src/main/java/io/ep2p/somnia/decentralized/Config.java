@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Config {
     private int minimumDistribution = 20;
+    private boolean forceStore = true;
 }

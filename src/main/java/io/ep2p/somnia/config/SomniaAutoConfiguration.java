@@ -62,6 +62,7 @@ public class SomniaAutoConfiguration {
     public Config somniaDecentralizedConfig(SomniaDecentralizedConfigProperties somniaDecentralizedConfigProperties){
         return Config.builder()
                 .minimumDistribution(somniaDecentralizedConfigProperties.getMinimumDistribution())
+                .forceStore(somniaDecentralizedConfigProperties.isForceStore())
                 .build();
     }
 

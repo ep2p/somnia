@@ -1,6 +1,7 @@
 package io.ep2p.somnia.decentralized;
 
 import io.ep2p.kademlia.connection.NodeConnectionApi;
+import io.ep2p.kademlia.exception.StoreException;
 import io.ep2p.kademlia.model.FindNodeAnswer;
 import io.ep2p.kademlia.model.GetAnswer;
 import io.ep2p.kademlia.model.PingAnswer;
@@ -123,63 +124,59 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
     }
 
     @Override
-    public void onStoreRequest(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {
+    protected StoreAnswer<BigInteger, SomniaKey> handleStore(SomniaKey key, SomniaValue value, boolean force, Node<BigInteger, SomniaConnectionInfo> requester, Node<BigInteger, SomniaConnectionInfo> caller) throws StoreException {
         Optional<SomniaDocument> optionalSomniaDocument = somniaEntityManager.getDocumentOfName(key.getName());
         if(!optionalSomniaDocument.isPresent()){
-            this.getNodeConnectionApi().sendStoreResults(this, requester, key, false);
+            return getNewStoreAnswer(key, StoreAnswer.Result.FAILED, this);
         }else {
-            handleStoreRequest(caller, requester, key, value, optionalSomniaDocument.get());
+            return handleStoreRequest(caller, requester, key, value, optionalSomniaDocument.get());
         }
     }
 
-    private void handleStoreRequest(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value, SomniaDocument somniaDocument) {
+    private StoreAnswer<BigInteger, SomniaKey> handleStoreRequest(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value, SomniaDocument somniaDocument) {
         switch (somniaDocument.type()) {
             case HIT:
-                handleHitStore(caller, requester, key, value);
-                break;
+                return handleHitStore(caller, requester, key, value);
             case DISTRIBUTE:
-                handleDistributedStore(caller, requester, key, value);
-                break;
+                return handleDistributedStore(caller, requester, key, value);
         }
+        return getNewStoreAnswer(key, StoreAnswer.Result.FAILED, this);
     }
 
-    private void handleDistributedStore(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {
+    private StoreAnswer<BigInteger, SomniaKey> handleHitStore(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {
         if (this.getId().equals(key.getHash())) {
-            doStore(requester, key, value);
+            doStore(key, value);
+            return getNewStoreAnswer(key, StoreAnswer.Result.STORED, this);
         } else {
             // pass data to the closest node to store it
-            StoreAnswer<BigInteger, SomniaKey> storeAnswer = storeInClosestNodes(requester, key, value, caller);
-            // still, store the data
-            getKademliaRepository().store(key, value);
+            return storeInClosestNodes(requester, key, value, caller);
         }
     }
 
-    private void handleHitStore(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {
+    private StoreAnswer<BigInteger, SomniaKey> handleDistributedStore(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {
         if (getKademliaRepository().contains(key)){
             this.getNodeConnectionApi().sendStoreResults(this, requester, key, true);
-            return;
+            return getNewStoreAnswer(key, StoreAnswer.Result.STORED, this);
         }
-        doStore(requester, key, value);
+        StoreAnswer<BigInteger, SomniaKey> storeAnswer = doStore(key, value);
         distributeDataToOtherNodes(requester, key, value, caller);
+        return storeAnswer;
     }
 
-    private void doStore(Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {
+    private StoreAnswer<BigInteger, SomniaKey> doStore(SomniaKey key, SomniaValue value) {
         try {
             getKademliaRepository().store(key, value);
-            this.getNodeConnectionApi().sendStoreResults(this, requester, key, true);
+            return getNewStoreAnswer(key, StoreAnswer.Result.STORED, this);
         }catch (Exception e){
             log.error("Failed to store data on kademlia. " + key, e);
-            this.getNodeConnectionApi().sendStoreResults(this, requester, key, false);
+            return getNewStoreAnswer(key, StoreAnswer.Result.FAILED, this);
         }
     }
-
 
     private StoreAnswer<BigInteger, SomniaKey> storeInClosestNodes(Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value, Node<BigInteger, SomniaConnectionInfo> caller){
         FindNodeAnswer<BigInteger, SomniaConnectionInfo> findNodeAnswer = this.getRoutingTable().findClosest(hash(key));
         return this.storeDataToClosestNode(requester, findNodeAnswer.getNodes(), key, value, caller);
     }
-
-
 
     protected void distributeDataToOtherNodes(Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value, Node<BigInteger, SomniaConnectionInfo> nodeToIgnore){
         Date date = getDateOfSecondsAgo(LAST_SEEN_SECONDS_TO_CONSIDER_ALIVE);

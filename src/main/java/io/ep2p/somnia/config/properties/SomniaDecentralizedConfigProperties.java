@@ -9,4 +9,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 public class SomniaDecentralizedConfigProperties {
     private int minimumDistribution;
+    private boolean forceStore = true;
 }

@@ -1,5 +1,6 @@
 package io.ep2p.somnia.decentralized;
 
+import io.ep2p.kademlia.Common;
 import io.ep2p.kademlia.connection.NodeConnectionApi;
 import io.ep2p.kademlia.exception.StoreException;
 import io.ep2p.kademlia.model.FindNodeAnswer;
@@ -18,6 +19,8 @@ import io.ep2p.somnia.model.SomniaValue;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
 
@@ -103,7 +106,7 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
 
         boolean firstLoopDone = false;
         for (ExternalNode<BigInteger, SomniaConnectionInfo> externalNode : findNodeAnswer.getNodes()) {
-            if(key.getDistributions() > (config.getMinimumDistribution() / 4) && firstLoopDone){
+            if(key.getDistributions() > (config.getMaximumDistribution() / config.getPerNodeDistribution()) && firstLoopDone){
                 break;
             }
             if(firstLoopDone){
@@ -155,7 +158,7 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
 
     private StoreAnswer<BigInteger, SomniaKey> handleDistributedStore(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {
         if (getKademliaRepository().contains(key)){
-            this.getNodeConnectionApi().sendStoreResults(this, requester, key, true);
+            log.debug("Already having the key " + key.getKey() + " in node " + this.getId());
             return getNewStoreAnswer(key, StoreAnswer.Result.STORED, this);
         }
         StoreAnswer<BigInteger, SomniaKey> storeAnswer = doStore(key, value);
@@ -179,27 +182,44 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
     }
 
     protected void distributeDataToOtherNodes(Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value, Node<BigInteger, SomniaConnectionInfo> nodeToIgnore){
-        Date date = getDateOfSecondsAgo(LAST_SEEN_SECONDS_TO_CONSIDER_ALIVE);
-        FindNodeAnswer<BigInteger, SomniaConnectionInfo> findNodeAnswer = this.getRoutingTable().findClosest(hash(key));
 
-        for (ExternalNode<BigInteger, SomniaConnectionInfo> externalNode : findNodeAnswer.getNodes()) {
+        BigInteger hash = hash(key);
+
+        ArrayList<ExternalNode<BigInteger, SomniaConnectionInfo>> nodes = this.getRoutingTable().findClosest(hash).getNodes();
+        if (key.getDistributions() % 2 == 0){
+            Collections.reverse(nodes);
+        }
+
+        int d = doDataDistribution(nodes, requester, key, value, nodeToIgnore, 0);
+        if (d < config.getPerNodeDistribution()){
+            nodes = this.getRoutingTable().findClosest(hash.xor(this.getId())).getNodes();
+            d = doDataDistribution(nodes, requester, key, value, nodeToIgnore, d);
+        }
+        if (d < config.getPerNodeDistribution()){
+            nodes = this.getRoutingTable().findClosest(hash.xor(BigInteger.valueOf((long) Math.pow(2, Common.IDENTIFIER_SIZE)))).getNodes();
+            doDataDistribution(nodes, requester, key, value, nodeToIgnore, d);
+        }
+
+    }
+
+    protected int doDataDistribution(ArrayList<ExternalNode<BigInteger, SomniaConnectionInfo>> nodes, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value, Node<BigInteger, SomniaConnectionInfo> nodeToIgnore, int distribution){
+        Date date = getDateOfSecondsAgo(LAST_SEEN_SECONDS_TO_CONSIDER_ALIVE);
+
+        for (ExternalNode<BigInteger, SomniaConnectionInfo> externalNode: nodes) {
             //skip current node
             if(externalNode.getId().equals(getId())){
-                if (key.getDistributions() > 3){
-                    break;
-                }else {
-                    continue;
-                }
+                continue;
             }
             // skip the ignored node
             if(nodeToIgnore != null && nodeToIgnore.getId().equals(externalNode.getId())){
                 continue;
             }
             // if minimum distribution has reached, there is no need to distribute more
-            if (key.getDistributions() == this.config.getMinimumDistribution()){
+            if (key.getDistributions() == this.config.getMaximumDistribution() || distribution == config.getPerNodeDistribution()){
                 break;
             }
 
+            log.debug("Distributing store for key " + key.getKey() + " in node " + this.getId() + " to node " + externalNode.getId() + ". Distribution: " + key.getDistributions());
             //try next close requester in routing table
             PingAnswer<BigInteger> pingAnswer;
             //if external node is alive, tell it to store the data
@@ -210,6 +230,7 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
                 getRoutingTable().delete(externalNode);
             }
         }
+        return distribution;
     }
 
 }

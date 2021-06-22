@@ -8,6 +8,7 @@ import io.ep2p.kademlia.node.KademliaNode;
 import io.ep2p.kademlia.node.KademliaRepositoryNode;
 import io.ep2p.kademlia.node.Node;
 import io.ep2p.somnia.decentralized.SomniaConnectionInfo;
+import io.ep2p.somnia.model.SomniaKey;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -24,7 +25,7 @@ public class LocalNodeConnectionApi<ID extends Number> implements NodeConnection
         nodeMap.putIfAbsent(node.getId(), node);
     }
 
-    protected final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    protected final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     public LocalNodeConnectionApi() {
         synchronized (nodeMap){
@@ -36,14 +37,14 @@ public class LocalNodeConnectionApi<ID extends Number> implements NodeConnection
     public PingAnswer<ID> ping(Node<ID, SomniaConnectionInfo> caller, Node<ID, SomniaConnectionInfo> node) {
         KademliaNode<ID, SomniaConnectionInfo> kademliaNode = nodeMap.get(node.getId());
         if(kademliaNode == null){
-            PingAnswer pingAnswer = new PingAnswer(node.getId());
+            PingAnswer<ID> pingAnswer = new PingAnswer<>(node.getId());
             pingAnswer.setAlive(false);
             return pingAnswer;
         }
         try {
             return kademliaNode.onPing(caller);
         } catch (NodeIsOfflineException e) {
-            return new PingAnswer(node.getId(), false);
+            return new PingAnswer<>(node.getId(), false);
         }
     }
 
@@ -73,6 +74,8 @@ public class LocalNodeConnectionApi<ID extends Number> implements NodeConnection
     @Override
     public <K, V> void storeAsync(Node<ID, SomniaConnectionInfo> caller, Node<ID, SomniaConnectionInfo> requester, Node<ID, SomniaConnectionInfo> node, K key, V value) {
         log.info("storeAsync("+caller.getId()+", "+requester.getId()+", "+node.getId()+", "+key+", "+value+")");
+        assert key instanceof SomniaKey;
+        K newKey = (K) ((SomniaKey) key).clone();
         KademliaNode<ID, SomniaConnectionInfo> kademliaNode = nodeMap.get(node.getId());
         if(kademliaNode instanceof KademliaRepositoryNode){
             executorService.submit(new Runnable() {
@@ -84,7 +87,7 @@ public class LocalNodeConnectionApi<ID extends Number> implements NodeConnection
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    ((KademliaRepositoryNode) kademliaNode).onStoreRequest(caller, requester, key, value);
+                    ((KademliaRepositoryNode) kademliaNode).onStoreRequest(caller, requester, newKey, value);
                 }
             });
         }
@@ -96,6 +99,8 @@ public class LocalNodeConnectionApi<ID extends Number> implements NodeConnection
     @Override
     public <K> void getRequest(Node<ID, SomniaConnectionInfo> caller, Node<ID, SomniaConnectionInfo> requester, Node<ID, SomniaConnectionInfo> node, K key) {
         log.info("getRequest("+caller.getId()+", "+requester.getId()+", "+node.getId()+", "+key+")");
+        assert key instanceof SomniaKey;
+        K newKey = (K) ((SomniaKey) key).clone();
         KademliaNode<ID, SomniaConnectionInfo> kademliaNode = nodeMap.get(node.getId());
         if(kademliaNode instanceof KademliaRepositoryNode){
             executorService.submit(new Runnable() {
@@ -107,7 +112,7 @@ public class LocalNodeConnectionApi<ID extends Number> implements NodeConnection
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    ((KademliaRepositoryNode) kademliaNode).onGetRequest(caller, requester, key);
+                    ((KademliaRepositoryNode) kademliaNode).onGetRequest(caller, requester, newKey);
                 }
             });
         }
@@ -117,18 +122,22 @@ public class LocalNodeConnectionApi<ID extends Number> implements NodeConnection
     @Override
     public <K, V> void sendGetResults(Node<ID, SomniaConnectionInfo> caller, Node<ID, SomniaConnectionInfo> requester, K key, V value) {
         log.info("sendGetResults("+caller.getId()+", "+requester.getId()+", "+key+", "+value+")");
+        assert key instanceof SomniaKey;
+        K newKey = (K) ((SomniaKey) key).clone();
         KademliaNode<ID, SomniaConnectionInfo> kademliaNode = nodeMap.get(requester.getId());
         if(kademliaNode instanceof KademliaRepositoryNode){
-            ((KademliaRepositoryNode) kademliaNode).onGetResult(caller, key, value);
+            ((KademliaRepositoryNode) kademliaNode).onGetResult(caller, newKey, value);
         }
     }
 
     @Override
     public <K> void sendStoreResults(Node<ID, SomniaConnectionInfo> caller, Node<ID, SomniaConnectionInfo> requester, K key, boolean success) {
-        log.info("sendStoreResults("+caller.getId()+", "+requester.getId()+", "+key+", "+success+")");
+//        log.info("sendStoreResults("+caller.getId()+", "+requester.getId()+", "+key+", "+success+")");
+        assert key instanceof SomniaKey;
+        K newKey = (K) ((SomniaKey) key).clone();
         KademliaNode<ID, SomniaConnectionInfo> kademliaNode = nodeMap.get(requester.getId());
         if(kademliaNode instanceof KademliaRepositoryNode){
-            ((KademliaRepositoryNode) kademliaNode).onStoreResult(caller, key, success);
+            ((KademliaRepositoryNode) kademliaNode).onStoreResult(caller, newKey, success);
         }
     }
 

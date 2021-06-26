@@ -36,7 +36,6 @@ import java.math.BigInteger;
 @Configuration
 @EnableConfigurationProperties({SomniaBaseConfigProperties.class, SomniaDecentralizedConfigProperties.class})
 @EnableMongoRepositories
-@Import(EntityManagerRegisterer.class)
 public class SomniaAutoConfiguration {
 
     @Bean("somniaSimpleModule")

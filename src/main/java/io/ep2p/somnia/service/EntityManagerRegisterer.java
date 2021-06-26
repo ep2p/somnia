@@ -45,7 +45,9 @@ public class EntityManagerRegisterer {
         Map<String, Object> candidates = applicationContext.getBeansWithAnnotation(SpringBootApplication.class);
         Class<?> aClass = candidates.isEmpty() ? null : candidates.values().toArray()[0].getClass();
         if (aClass != null){
-            packages.add(aClass.getName());
+            String className = aClass.getName();
+            packages.add(className);
+            log.info("Scanning " + className + " for somnia entities");
         }
 
         if (packages.size() == 0){

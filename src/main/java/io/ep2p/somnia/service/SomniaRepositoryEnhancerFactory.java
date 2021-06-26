@@ -8,6 +8,7 @@ import io.ep2p.kademlia.exception.StoreException;
 import io.ep2p.kademlia.model.GetAnswer;
 import io.ep2p.kademlia.model.StoreAnswer;
 import io.ep2p.somnia.config.dynamic.DynamicRepository;
+import io.ep2p.somnia.decentralized.SomniaEntityManager;
 import io.ep2p.somnia.decentralized.SomniaKademliaSyncRepositoryNode;
 import io.ep2p.somnia.model.*;
 import lombok.SneakyThrows;
@@ -29,11 +30,13 @@ public class SomniaRepositoryEnhancerFactory {
     private final SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode;
     private final HashGenerator hashGenerator;
     private final ObjectMapper objectMapper;
+    private final SomniaEntityManager somniaEntityManager;
 
-    public SomniaRepositoryEnhancerFactory(SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode, HashGenerator hashGenerator, ObjectMapper objectMapper) {
+    public SomniaRepositoryEnhancerFactory(SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode, HashGenerator hashGenerator, ObjectMapper objectMapper, SomniaEntityManager somniaEntityManager) {
         this.somniaKademliaSyncRepositoryNode = somniaKademliaSyncRepositoryNode;
         this.hashGenerator = hashGenerator;
         this.objectMapper = objectMapper;
+        this.somniaEntityManager = somniaEntityManager;
     }
 
     public <PS> PS create(ClassLoader classLoader, Class<PS> clazz){
@@ -55,6 +58,7 @@ public class SomniaRepositoryEnhancerFactory {
                 }
 
                 DynamicRepository dynamicRepository = clazz.getAnnotation(DynamicRepository.class);
+                somniaEntityManager.register(dynamicRepository.through());
                 switch (method.getName()){
                     case "save":
                         assert args.length == 2 && args[0] instanceof BigInteger && args[1] instanceof Serializable;

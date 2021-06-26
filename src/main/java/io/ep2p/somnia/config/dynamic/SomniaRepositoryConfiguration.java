@@ -1,6 +1,7 @@
 package io.ep2p.somnia.config.dynamic;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.ep2p.somnia.decentralized.SomniaEntityManager;
 import io.ep2p.somnia.decentralized.SomniaKademliaSyncRepositoryNode;
 import io.ep2p.somnia.service.HashGenerator;
 import io.ep2p.somnia.service.SomniaRepositoryEnhancerFactory;
@@ -13,8 +14,8 @@ public class SomniaRepositoryConfiguration {
 
     @Bean
     @DependsOn({"somniaKademliaSyncRepositoryNode", "somniaEntityManager", "somniaHashGenerator", "somniaObjectMapper"})
-    public SomniaRepositoryEnhancerFactory somniaRepositoryEnhancerFactory(SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode, HashGenerator somniaHashGenerator, ObjectMapper somniaObjectMapper){
-        return new SomniaRepositoryEnhancerFactory(somniaKademliaSyncRepositoryNode, somniaHashGenerator, somniaObjectMapper);
+    public SomniaRepositoryEnhancerFactory somniaRepositoryEnhancerFactory(SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode, HashGenerator somniaHashGenerator, ObjectMapper somniaObjectMapper, SomniaEntityManager somniaEntityManager){
+        return new SomniaRepositoryEnhancerFactory(somniaKademliaSyncRepositoryNode, somniaHashGenerator, somniaObjectMapper, somniaEntityManager);
     }
 
     @Bean(name = "somniaRepositoryProxyBeanFactory")

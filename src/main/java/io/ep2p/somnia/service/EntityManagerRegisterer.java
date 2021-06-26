@@ -46,6 +46,9 @@ public class EntityManagerRegisterer {
         Class<?> aClass = candidates.isEmpty() ? null : candidates.values().toArray()[0].getClass();
         if (aClass != null){
             String className = aClass.getName();
+            if (className.contains("$$") && className.contains(".")){
+                className = extractClass(className);
+            }
             packages.add(className);
             log.info("Scanning " + className + " for somnia entities");
         }
@@ -55,6 +58,18 @@ public class EntityManagerRegisterer {
         }
 
         scanPackages(packages);
+    }
+
+    private String extractClass(String c){
+        String[] items = c.split("\\$$")[0].split("\\.");
+        StringBuilder stringBuilder = new StringBuilder();
+        for(int i = 0; i < items.length - 1; i++){
+            stringBuilder.append(items[i]);
+            if (i != items.length - 2){
+                stringBuilder.append(".");
+            }
+        }
+        return stringBuilder.toString();
     }
 
     @SneakyThrows

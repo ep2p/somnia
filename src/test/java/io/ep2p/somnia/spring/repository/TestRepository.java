@@ -5,6 +5,6 @@ import io.ep2p.somnia.spring.mock.SampleData;
 import io.ep2p.somnia.spring.mock.SampleSomniaEntity;
 import io.ep2p.somnia.storage.SomniaRepository;
 
-@DynamicRepository(through = SampleSomniaEntity.class)
-public interface TestRepository extends SomniaRepository<SampleData> {
+@DynamicRepository
+public interface TestRepository extends SomniaRepository<SampleData, SampleSomniaEntity> {
 }

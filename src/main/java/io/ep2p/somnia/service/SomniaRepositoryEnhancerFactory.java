@@ -7,10 +7,12 @@ import io.ep2p.kademlia.exception.GetException;
 import io.ep2p.kademlia.exception.StoreException;
 import io.ep2p.kademlia.model.GetAnswer;
 import io.ep2p.kademlia.model.StoreAnswer;
-import io.ep2p.somnia.config.dynamic.DynamicRepository;
 import io.ep2p.somnia.decentralized.SomniaEntityManager;
 import io.ep2p.somnia.decentralized.SomniaKademliaSyncRepositoryNode;
-import io.ep2p.somnia.model.*;
+import io.ep2p.somnia.model.RepositoryResponse;
+import io.ep2p.somnia.model.SomniaEntity;
+import io.ep2p.somnia.model.SomniaKey;
+import io.ep2p.somnia.model.SomniaValue;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.proxy.Enhancer;
@@ -47,36 +49,39 @@ public class SomniaRepositoryEnhancerFactory {
             @Override
             public Object invoke(Object object, Method method, Object[] args) throws Throwable {
                 Class<?> dataType = null;
+                Class<?> through = null;
                 Type[] genericInterfaces = clazz.getGenericInterfaces();
                 for (Type genericInterface : genericInterfaces) {
                     if (genericInterface instanceof ParameterizedType) {
                         Type[] genericTypes = ((ParameterizedType) genericInterface).getActualTypeArguments();
-                        if (genericTypes.length > 0){
+                        if (genericTypes.length > 1){
                             dataType = Class.forName(genericTypes[0].getTypeName());
+                            through = Class.forName(genericTypes[1].getTypeName());
                         }
                     }
                 }
 
-                DynamicRepository dynamicRepository = clazz.getAnnotation(DynamicRepository.class);
-                somniaEntityManager.register(dynamicRepository.through());
+                assert through != null;
+
+                somniaEntityManager.register((Class<? extends SomniaEntity<?>>) through);
                 switch (method.getName()){
                     case "save":
                         assert args.length == 2 && args[0] instanceof BigInteger && args[1] instanceof Serializable;
-                        return save(dynamicRepository.through(), (BigInteger) args[0], (Serializable) args[1]);
+                        return save(through, (BigInteger) args[0], (Serializable) args[1]);
                     case "findOne":
                         assert args.length == 1 && args[0] instanceof BigInteger;
-                        return findOne(dynamicRepository.through(), dataType, (BigInteger) args[0]);
+                        return findOne(through, dataType, (BigInteger) args[0]);
                     case "findAll":
                         assert args.length == 1 && args[0] instanceof BigInteger;
-                        return findAll(dynamicRepository.through(), dataType, (BigInteger) args[0]);
+                        return findAll(through, dataType, (BigInteger) args[0]);
                     case "find":
                         if (args.length == 3 && args[0] instanceof BigInteger
                                 && args[1] instanceof Long && args[2] instanceof Integer){
-                            return find(dynamicRepository.through(), dataType, (BigInteger) args[0], (Long) args[1], (Integer) args[2]);
+                            return find(through, dataType, (BigInteger) args[0], (Long) args[1], (Integer) args[2]);
                         }
                         if (args.length == 4 && args[0] instanceof BigInteger && args[1] instanceof Query
                                 && args[2] instanceof Long && args[3] instanceof Integer){
-                            return find(dynamicRepository.through(), dataType, (BigInteger) args[0], (Query) args[1], (Long) args[2], (Integer) args[3]);
+                            return find(through, dataType, (BigInteger) args[0], (Query) args[1], (Long) args[2], (Integer) args[3]);
                         }
                 }
                 throw new RuntimeException("Unknown method");
@@ -118,7 +123,7 @@ public class SomniaRepositoryEnhancerFactory {
     }
 
     @SneakyThrows
-    private RepositoryResponse<?> find(Class<? extends SomniaEntity<?>> through, Class<?> dataType, BigInteger key, Long offset, Integer limit) {
+    private RepositoryResponse<?> find(Class<?> through, Class<?> dataType, BigInteger key, Long offset, Integer limit) {
         SomniaKey somniaKey = SomniaKey.builder()
                 .key(key)
                 .name(through.getName())

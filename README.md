@@ -1,4 +1,3 @@
-[![](https://jitpack.io/v/ep2p/somnia.svg)](https://jitpack.io/#ep2p/somnia)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.ep2p/somnia/badge.png?gav=true)](https://maven-badges.herokuapp.com/maven-central/io.ep2p/somnia)
 
 ```

@@ -25,14 +25,14 @@ public class SomniaKey implements Serializable {
         this.distributions++;
     }
 
-    public SomniaKey clone(){
+    public SomniaKey makeClone(){
         return SomniaKey.builder()
                 .distributions(this.getDistributions())
                 .key(this.getKey())
                 .name(this.getName())
                 .hash(this.getHash())
                 .hitNode(this.getHitNode())
-                .meta(this.getMeta())
+                .meta(this.getMeta().makeClone())
                 .build();
     }
 
@@ -45,7 +45,7 @@ public class SomniaKey implements Serializable {
         private int limit = 20;
         private String query;
 
-        public Meta clone(){
+        public Meta makeClone(){
             return Meta.builder()
                     .limit(this.getLimit())
                     .offset(this.getOffset())

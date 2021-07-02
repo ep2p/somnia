@@ -75,7 +75,7 @@ public class LocalNodeConnectionApi<ID extends Number> implements NodeConnection
     public <K, V> void storeAsync(Node<ID, SomniaConnectionInfo> caller, Node<ID, SomniaConnectionInfo> requester, Node<ID, SomniaConnectionInfo> node, K key, V value) {
         log.info("storeAsync("+caller.getId()+", "+requester.getId()+", "+node.getId()+", "+key+", "+value+")");
         assert key instanceof SomniaKey;
-        K newKey = (K) ((SomniaKey) key).clone();
+        K newKey = (K) ((SomniaKey) key).makeClone();
         KademliaNode<ID, SomniaConnectionInfo> kademliaNode = nodeMap.get(node.getId());
         if(kademliaNode instanceof KademliaRepositoryNode){
             executorService.submit(new Runnable() {
@@ -100,7 +100,7 @@ public class LocalNodeConnectionApi<ID extends Number> implements NodeConnection
     public <K> void getRequest(Node<ID, SomniaConnectionInfo> caller, Node<ID, SomniaConnectionInfo> requester, Node<ID, SomniaConnectionInfo> node, K key) {
         log.info("getRequest("+caller.getId()+", "+requester.getId()+", "+node.getId()+", "+key+")");
         assert key instanceof SomniaKey;
-        K newKey = (K) ((SomniaKey) key).clone();
+        K newKey = (K) ((SomniaKey) key).makeClone();
         KademliaNode<ID, SomniaConnectionInfo> kademliaNode = nodeMap.get(node.getId());
         if(kademliaNode instanceof KademliaRepositoryNode){
             executorService.submit(new Runnable() {
@@ -123,7 +123,7 @@ public class LocalNodeConnectionApi<ID extends Number> implements NodeConnection
     public <K, V> void sendGetResults(Node<ID, SomniaConnectionInfo> caller, Node<ID, SomniaConnectionInfo> requester, K key, V value) {
         log.info("sendGetResults("+caller.getId()+", "+requester.getId()+", "+key+", "+value+")");
         assert key instanceof SomniaKey;
-        K newKey = (K) ((SomniaKey) key).clone();
+        K newKey = (K) ((SomniaKey) key).makeClone();
         KademliaNode<ID, SomniaConnectionInfo> kademliaNode = nodeMap.get(requester.getId());
         if(kademliaNode instanceof KademliaRepositoryNode){
             ((KademliaRepositoryNode) kademliaNode).onGetResult(caller, newKey, value);
@@ -132,9 +132,9 @@ public class LocalNodeConnectionApi<ID extends Number> implements NodeConnection
 
     @Override
     public <K> void sendStoreResults(Node<ID, SomniaConnectionInfo> caller, Node<ID, SomniaConnectionInfo> requester, K key, boolean success) {
-//        log.info("sendStoreResults("+caller.getId()+", "+requester.getId()+", "+key+", "+success+")");
-        assert key instanceof SomniaKey;
-        K newKey = (K) ((SomniaKey) key).clone();
+        log.info("sendStoreResults("+caller.getId()+", "+requester.getId()+", "+key+", "+success+")");
+//        assert key instanceof SomniaKey;
+        K newKey = (K) ((SomniaKey) key).makeClone();
         KademliaNode<ID, SomniaConnectionInfo> kademliaNode = nodeMap.get(requester.getId());
         if(kademliaNode instanceof KademliaRepositoryNode){
             ((KademliaRepositoryNode) kademliaNode).onStoreResult(caller, newKey, success);

@@ -111,7 +111,6 @@ public class DistributionTest {
             }
         });
 
-        System.out.println(counter.get());
         Assertions.assertTrue(counter.get() > (this.nodeSize / 4));
         log.info("Distributed data to " + counter.get() + "s of nodes with network of size " + this.nodeSize + " and per-node distribution of " + 20);
     }

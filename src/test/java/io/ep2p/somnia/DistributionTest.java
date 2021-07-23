@@ -65,7 +65,7 @@ public class DistributionTest {
     *  Proof that Somnia can distribute data for at least 1/4 of the network
     */
     @Test
-    public void minimumDistributionTest() throws StoreException, BootstrapException, InterruptedException {
+    public void minimumDistributionTest() throws StoreException, BootstrapException, InterruptedException, GetException {
         init_network(Config.builder()
                 .forceStore(true)
                 .perNodeDistribution(20)
@@ -113,5 +113,9 @@ public class DistributionTest {
 
         Assertions.assertTrue(counter.get() > (this.nodeSize / 4));
         log.info("Distributed data to " + counter.get() + "s of nodes with network of size " + this.nodeSize + " and per-node distribution of " + 20);
+
+        GetAnswer<BigInteger, SomniaKey, SomniaValue> getAnswer = nodes.get(0).get(key);
+        Assertions.assertTrue(getAnswer.getValue().isExists());
+        Assertions.assertEquals(getAnswer.getValue().getCount(), 1);
     }
 }

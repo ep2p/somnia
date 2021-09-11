@@ -1,5 +1,6 @@
 package io.ep2p.somnia.spring.configuration;
 
+import io.ep2p.kademlia.NodeSettings;
 import io.ep2p.kademlia.connection.NodeConnectionApi;
 import io.ep2p.kademlia.table.BigIntegerRoutingTable;
 import io.ep2p.kademlia.table.Bucket;
@@ -10,6 +11,7 @@ import io.ep2p.somnia.decentralized.SomniaConnectionInfo;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.DependsOn;
 
 import java.math.BigInteger;
 
@@ -33,8 +35,9 @@ public class SomniaTestConfiguration {
     }
 
     @Bean
-    public RoutingTable<BigInteger, SomniaConnectionInfo, Bucket<BigInteger, SomniaConnectionInfo>> routingTable(BigInteger somniaNodeId){
-        return new BigIntegerRoutingTable<>(somniaNodeId);
+    @DependsOn("somniaNodeSettings")
+    public RoutingTable<BigInteger, SomniaConnectionInfo, Bucket<BigInteger, SomniaConnectionInfo>> routingTable(BigInteger somniaNodeId, NodeSettings somniaNodeSettings){
+        return new BigIntegerRoutingTable<>(somniaNodeId, somniaNodeSettings);
     }
 
     @Bean

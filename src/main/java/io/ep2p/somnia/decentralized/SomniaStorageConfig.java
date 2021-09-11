@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Config {
+public class SomniaStorageConfig {
     @Builder.Default
     private int perNodeDistribution = 3;
     @Builder.Default

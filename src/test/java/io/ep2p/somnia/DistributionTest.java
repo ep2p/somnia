@@ -1,16 +1,13 @@
 package io.ep2p.somnia;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.ep2p.kademlia.Common;
+import io.ep2p.kademlia.NodeSettings;
 import io.ep2p.kademlia.exception.BootstrapException;
+import io.ep2p.kademlia.exception.FullBucketException;
 import io.ep2p.kademlia.exception.GetException;
 import io.ep2p.kademlia.exception.StoreException;
 import io.ep2p.kademlia.model.GetAnswer;
 import io.ep2p.kademlia.model.StoreAnswer;
-import io.ep2p.kademlia.node.KademliaNode;
-import io.ep2p.kademlia.node.KademliaNodeListener;
-import io.ep2p.kademlia.node.Node;
-import io.ep2p.kademlia.table.BigIntegerRoutingTable;
 import io.ep2p.somnia.decentralized.*;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
@@ -35,12 +32,12 @@ public class DistributionTest {
     private final int nodeSize = 100;
     private final long timeout = 32000;
 
-    private void init_network(Config config) throws BootstrapException {
+    private void init_network(SomniaStorageConfig somniaStorageConfig) throws BootstrapException {
         nodes.clear();
-        Common.REFERENCED_NODES_UPDATE_PERIOD_SEC = 5;
-        Common.BUCKET_SIZE = 256;
-        Common.IDENTIFIER_SIZE = 256;
-        Common.ALPHA = 30;
+        NodeSettings.Default.REFERENCED_NODES_UPDATE_PERIOD = 5;
+        NodeSettings.Default.BUCKET_SIZE = 256;
+        NodeSettings.Default.IDENTIFIER_SIZE = 256;
+        NodeSettings.Default.ALPHA = 30;
 
 
         SomniaEntityManager somniaEntityManager = new DefaultSomniaEntityManager();
@@ -50,7 +47,7 @@ public class DistributionTest {
         SomniaKademliaSyncRepositoryNode previousNode = null;
         for(int i = 0; i < this.nodeSize; i++){
             SomniaKademliaRepository somniaKademliaRepository = new SomniaKademliaRepository(somniaEntityManager, new DefaultInMemoryStorage(objectMapper), new DefaultInMemoryStorage(objectMapper));
-            SomniaKademliaSyncRepositoryNode node = new SomniaKademliaSyncRepositoryNode(BigInteger.valueOf(i), new BigIntegerRoutingTable<>(BigInteger.valueOf(i)), localNodeConnectionApi, new SomniaConnectionInfo(), somniaKademliaRepository, somniaEntityManager, config);
+            SomniaKademliaSyncRepositoryNode node = new SomniaKademliaSyncRepositoryNode(BigInteger.valueOf(i), localNodeConnectionApi, new SomniaConnectionInfo(), NodeSettings.Default.build(), somniaKademliaRepository, somniaEntityManager, somniaStorageConfig);
             node.start();
             localNodeConnectionApi.registerNode(node);
             if (previousNode != null)
@@ -66,7 +63,7 @@ public class DistributionTest {
     */
     @Test
     public void minimumDistributionTest() throws StoreException, BootstrapException, InterruptedException, GetException {
-        init_network(Config.builder()
+        init_network(SomniaStorageConfig.builder()
                 .forceStore(true)
                 .perNodeDistribution(20)
                 .minimumDistribution(this.nodeSize / 4)
@@ -77,7 +74,9 @@ public class DistributionTest {
             List<SomniaKademliaSyncRepositoryNode> newList = new ArrayList<>(nodes);
             newList.remove(node);
             for (SomniaKademliaSyncRepositoryNode otherNode : newList) {
-                node.getRoutingTable().update(otherNode);
+                try {
+                    node.getRoutingTable().update(otherNode);
+                } catch (FullBucketException ignore) {}
             }
         });
 

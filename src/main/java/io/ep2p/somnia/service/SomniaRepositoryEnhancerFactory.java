@@ -105,7 +105,7 @@ public class SomniaRepositoryEnhancerFactory {
 
         StoreAnswer<BigInteger, SomniaKey> storeAnswer = null;
         try {
-            storeAnswer = this.somniaKademliaSyncRepositoryNode.store(somniaKey, somniaValue);
+            storeAnswer = this.somniaKademliaSyncRepositoryNode.store(somniaKey, somniaValue, true);
             StoreAnswer.Result result = storeAnswer.getResult();
             if (result == StoreAnswer.Result.FAILED || result == StoreAnswer.Result.TIMEOUT){
                 log.error("Failed to store data with key " + somniaKey + " result: " + result);

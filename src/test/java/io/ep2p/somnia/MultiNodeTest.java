@@ -3,6 +3,7 @@ package io.ep2p.somnia;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.ep2p.kademlia.NodeSettings;
 import io.ep2p.kademlia.exception.BootstrapException;
 import io.ep2p.kademlia.exception.GetException;
 import io.ep2p.kademlia.exception.StoreException;
@@ -43,8 +44,8 @@ public class MultiNodeTest {
         SomniaKademliaRepository somniaKademliaRepository2 = new SomniaKademliaRepository(somniaEntityManager, new DefaultInMemoryStorage(objectMapper), new DefaultInMemoryStorage(objectMapper));
 
 
-        this.node1 = new SomniaKademliaSyncRepositoryNode(node1Id, new BigIntegerRoutingTable<>(node1Id), localNodeConnectionApi, new SomniaConnectionInfo(), somniaKademliaRepository1, somniaEntityManager);
-        this.node2 = new SomniaKademliaSyncRepositoryNode(node2Id, new BigIntegerRoutingTable<>(node2Id), localNodeConnectionApi, new SomniaConnectionInfo(), somniaKademliaRepository2, somniaEntityManager);
+        this.node1 = new SomniaKademliaSyncRepositoryNode(node1Id, localNodeConnectionApi, new SomniaConnectionInfo(), NodeSettings.Default.build(), somniaKademliaRepository1, somniaEntityManager);
+        this.node2 = new SomniaKademliaSyncRepositoryNode(node2Id, localNodeConnectionApi, new SomniaConnectionInfo(), NodeSettings.Default.build(), somniaKademliaRepository2, somniaEntityManager);
         this.node1.start();
         this.node2.start();
         localNodeConnectionApi.registerNode(node1);
@@ -66,7 +67,8 @@ public class MultiNodeTest {
                                 .integerVal(2)
                                 .stringVal("store on node 2")
                                 .build()))
-                        .build()
+                        .build(),
+                true
         );
 
         GetAnswer<BigInteger, SomniaKey, SomniaValue> getAnswer = this.node2.get(SomniaKey.builder()
@@ -100,7 +102,8 @@ public class MultiNodeTest {
                                 .integerVal(2)
                                 .stringVal("store on all")
                                 .build()))
-                        .build()
+                        .build(),
+                true
         );
 
         GetAnswer<BigInteger, SomniaKey, SomniaValue> getAnswer = this.node2.get(SomniaKey.builder()

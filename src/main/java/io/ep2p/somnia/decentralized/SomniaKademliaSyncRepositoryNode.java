@@ -1,6 +1,6 @@
 package io.ep2p.somnia.decentralized;
 
-import io.ep2p.kademlia.Common;
+import io.ep2p.kademlia.NodeSettings;
 import io.ep2p.kademlia.connection.NodeConnectionApi;
 import io.ep2p.kademlia.exception.StoreException;
 import io.ep2p.kademlia.model.FindNodeAnswer;
@@ -24,23 +24,39 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
 
-import static io.ep2p.kademlia.Common.LAST_SEEN_SECONDS_TO_CONSIDER_ALIVE;
 import static io.ep2p.kademlia.util.DateUtil.getDateOfSecondsAgo;
 
 @Slf4j
 public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode<BigInteger, SomniaConnectionInfo, SomniaKey, SomniaValue> {
     private final SomniaEntityManager somniaEntityManager;
-    private final Config config;
+    private final SomniaStorageConfig somniaStorageConfig;
 
     public SomniaKademliaSyncRepositoryNode(
             BigInteger nodeId,
-            RoutingTable<BigInteger, SomniaConnectionInfo, Bucket<BigInteger, SomniaConnectionInfo>>
-                    routingTable,
             NodeConnectionApi<BigInteger, SomniaConnectionInfo> nodeConnectionApi,
             SomniaConnectionInfo connectionInfo,
+            NodeSettings nodeSettings,
             KademliaRepository<SomniaKey, SomniaValue> kademliaRepository,
             SomniaEntityManager somniaEntityManager) {
-        this(nodeId, routingTable,nodeConnectionApi, connectionInfo, kademliaRepository, somniaEntityManager, new Config());
+        this(nodeId, nodeConnectionApi, connectionInfo, nodeSettings, kademliaRepository, somniaEntityManager, new SomniaStorageConfig());
+    }
+
+    public SomniaKademliaSyncRepositoryNode(
+            BigInteger nodeId,
+            NodeConnectionApi<BigInteger, SomniaConnectionInfo> nodeConnectionApi,
+            SomniaConnectionInfo connectionInfo,
+            NodeSettings nodeSettings,
+            KademliaRepository<SomniaKey, SomniaValue> kademliaRepository,
+            SomniaEntityManager somniaEntityManager, SomniaStorageConfig somniaStorageConfig) {
+        super(
+                nodeId,
+                nodeConnectionApi,
+                connectionInfo,
+                nodeSettings,
+                kademliaRepository,
+                new SomniaKeyHashGenerator());
+        this.somniaEntityManager = somniaEntityManager;
+        this.somniaStorageConfig = somniaStorageConfig;
     }
 
     public SomniaKademliaSyncRepositoryNode(
@@ -49,17 +65,31 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
                     routingTable,
             NodeConnectionApi<BigInteger, SomniaConnectionInfo> nodeConnectionApi,
             SomniaConnectionInfo connectionInfo,
+            NodeSettings nodeSettings,
             KademliaRepository<SomniaKey, SomniaValue> kademliaRepository,
-            SomniaEntityManager somniaEntityManager, Config config) {
+            SomniaEntityManager somniaEntityManager) {
+        this(nodeId, routingTable,nodeConnectionApi, connectionInfo, nodeSettings, kademliaRepository, somniaEntityManager, new SomniaStorageConfig());
+    }
+
+    public SomniaKademliaSyncRepositoryNode(
+            BigInteger nodeId,
+            RoutingTable<BigInteger, SomniaConnectionInfo, Bucket<BigInteger, SomniaConnectionInfo>>
+                    routingTable,
+            NodeConnectionApi<BigInteger, SomniaConnectionInfo> nodeConnectionApi,
+            SomniaConnectionInfo connectionInfo,
+            NodeSettings nodeSettings,
+            KademliaRepository<SomniaKey, SomniaValue> kademliaRepository,
+            SomniaEntityManager somniaEntityManager, SomniaStorageConfig somniaStorageConfig) {
         super(
                 nodeId,
                 routingTable,
                 nodeConnectionApi,
                 connectionInfo,
+                nodeSettings,
                 kademliaRepository,
                 new SomniaKeyHashGenerator());
         this.somniaEntityManager = somniaEntityManager;
-        this.config = config;
+        this.somniaStorageConfig = somniaStorageConfig;
     }
 
     @Override
@@ -97,7 +127,7 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
         key.setHitNode(null);
         BigInteger hash = hash(key);
         FindNodeAnswer<BigInteger, SomniaConnectionInfo> findNodeAnswer = getRoutingTable().findClosest(hash);
-        Date date = getDateOfSecondsAgo(LAST_SEEN_SECONDS_TO_CONSIDER_ALIVE);
+        Date date = getDateOfSecondsAgo(getNodeSettings().getMaximumLastSeenAgeToConsiderAlive());
 
         /*
          * Look for nodes with the data.
@@ -106,7 +136,7 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
 
         boolean firstLoopDone = false;
         for (ExternalNode<BigInteger, SomniaConnectionInfo> externalNode : findNodeAnswer.getNodes()) {
-            if(key.getDistributions() > (config.getMaximumDistribution() / config.getPerNodeDistribution()) && firstLoopDone){
+            if(key.getDistributions() > (somniaStorageConfig.getMaximumDistribution() / somniaStorageConfig.getPerNodeDistribution()) && firstLoopDone){
                 break;
             }
             if(firstLoopDone){
@@ -191,19 +221,19 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
         }
 
         int d = doDataDistribution(nodes, requester, key, value, nodeToIgnore, 0);
-        if (d < config.getPerNodeDistribution()){
+        if (d < somniaStorageConfig.getPerNodeDistribution()){
             nodes = this.getRoutingTable().findClosest(hash.xor(this.getId())).getNodes();
             d = doDataDistribution(nodes, requester, key, value, nodeToIgnore, d);
         }
-        if (d < config.getPerNodeDistribution()){
-            nodes = this.getRoutingTable().findClosest(hash.xor(BigInteger.valueOf((long) Math.pow(2, Common.IDENTIFIER_SIZE)))).getNodes();
+        if (d < somniaStorageConfig.getPerNodeDistribution()){
+            nodes = this.getRoutingTable().findClosest(hash.xor(BigInteger.valueOf((long) Math.pow(2, getNodeSettings().getIdentifierSize())))).getNodes();
             doDataDistribution(nodes, requester, key, value, nodeToIgnore, d);
         }
 
     }
 
     protected int doDataDistribution(ArrayList<ExternalNode<BigInteger, SomniaConnectionInfo>> nodes, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value, Node<BigInteger, SomniaConnectionInfo> nodeToIgnore, int distribution){
-        Date date = getDateOfSecondsAgo(LAST_SEEN_SECONDS_TO_CONSIDER_ALIVE);
+        Date date = getDateOfSecondsAgo(getNodeSettings().getMaximumLastSeenAgeToConsiderAlive());
 
         for (ExternalNode<BigInteger, SomniaConnectionInfo> externalNode: nodes) {
             //skip current node
@@ -215,7 +245,7 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
                 continue;
             }
             // if minimum distribution has reached, there is no need to distribute more
-            if (key.getDistributions() == this.config.getMaximumDistribution() || distribution == config.getPerNodeDistribution()){
+            if (key.getDistributions() == this.somniaStorageConfig.getMaximumDistribution() || distribution == somniaStorageConfig.getPerNodeDistribution()){
                 break;
             }
 

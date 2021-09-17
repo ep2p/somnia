@@ -12,6 +12,7 @@ import io.ep2p.kademlia.table.Bucket;
 import io.ep2p.kademlia.table.RoutingTable;
 import io.ep2p.somnia.config.properties.SomniaBaseConfigProperties;
 import io.ep2p.somnia.config.properties.SomniaDecentralizedConfigProperties;
+import io.ep2p.somnia.config.properties.SomniaKademliaRepublishSettingsProperties;
 import io.ep2p.somnia.config.properties.SomniaKademliaSettingsProperties;
 import io.ep2p.somnia.config.serialization.ExternalNodeDeserializer;
 import io.ep2p.somnia.config.serialization.ExternalNodeSerializer;
@@ -35,7 +36,14 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import java.math.BigInteger;
 
 @Configuration
-@EnableConfigurationProperties({SomniaBaseConfigProperties.class, SomniaDecentralizedConfigProperties.class, SomniaKademliaSettingsProperties.class})
+@EnableConfigurationProperties(
+    {
+        SomniaBaseConfigProperties.class,
+        SomniaDecentralizedConfigProperties.class,
+        SomniaKademliaSettingsProperties.class,
+        SomniaKademliaRepublishSettingsProperties.class
+    }
+)
 @EnableMongoRepositories
 public class SomniaAutoConfiguration {
 
@@ -94,7 +102,7 @@ public class SomniaAutoConfiguration {
     }
 
     @Bean(value = "somniaNodeSettings")
-    public NodeSettings somniaNodeSettings(SomniaKademliaSettingsProperties somniaKademliaSettingsProperties){
+    public NodeSettings somniaNodeSettings(SomniaKademliaSettingsProperties somniaKademliaSettingsProperties, SomniaKademliaRepublishSettingsProperties somniaKademliaRepublishSettingsProperties){
         return NodeSettings.builder()
                 .maximumLastSeenAgeToConsiderAlive(somniaKademliaSettingsProperties.getMaximumLastSeenAgeToConsiderAlive())
                 .findNodeSize(somniaKademliaSettingsProperties.getFindNodeSize())
@@ -106,7 +114,7 @@ public class SomniaAutoConfiguration {
                 .storeTimeout(somniaKademliaSettingsProperties.getStoreTimeout())
                 .bootstrapNodeCallTimeout(somniaKademliaSettingsProperties.getBootstrapNodeCallTimeout())
                 .enabledRepublishing(somniaKademliaSettingsProperties.isEnabledRepublishing())
-                .republishSettings(somniaKademliaSettingsProperties.getRepublishSettings())
+                .republishSettings(somniaKademliaRepublishSettingsProperties)
                 .build();
     }
 

@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.ep2p.kademlia.NodeSettings;
+import io.ep2p.kademlia.connection.ConnectionInfo;
 import io.ep2p.kademlia.connection.NodeConnectionApi;
 import io.ep2p.kademlia.node.KademliaRepository;
 import io.ep2p.kademlia.node.external.ExternalNode;
+import io.ep2p.kademlia.service.RepublishStrategy;
+import io.ep2p.kademlia.service.RepublishStrategyFactory;
 import io.ep2p.kademlia.table.Bucket;
 import io.ep2p.kademlia.table.RoutingTable;
 import io.ep2p.somnia.config.properties.SomniaBaseConfigProperties;
@@ -18,10 +21,7 @@ import io.ep2p.somnia.config.serialization.ExternalNodeSerializer;
 import io.ep2p.somnia.decentralized.*;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
-import io.ep2p.somnia.service.DefaultRedistributionTaskHandler;
-import io.ep2p.somnia.service.EntityManagerRegisterer;
-import io.ep2p.somnia.service.HashGenerator;
-import io.ep2p.somnia.service.RedistributionTaskHandler;
+import io.ep2p.somnia.service.*;
 import io.ep2p.somnia.storage.DefaultInMemoryStorage;
 import io.ep2p.somnia.storage.MongoStorage;
 import io.ep2p.somnia.storage.Storage;
@@ -106,6 +106,19 @@ public class SomniaAutoConfiguration {
     @DependsOn({"somniaKademliaRepository"})
     public RedistributionTaskHandler redistributionTaskHandler(KademliaRepository<SomniaKey, SomniaValue> somniaKademliaRepository) {
         return new DefaultRedistributionTaskHandler();
+    }
+
+    @Bean
+    public RepublishStrategy<BigInteger, SomniaConnectionInfo, SomniaKey, SomniaValue> republishStrategy(){
+        SomniaRepublishStrategy somniaRepublishStrategy = new SomniaRepublishStrategy();
+        RepublishStrategyFactory.PROVIDER = new RepublishStrategyFactory.Provider() {
+            @Override
+            @SuppressWarnings("unchecked")
+            public <ID extends Number, C extends ConnectionInfo, K, V> RepublishStrategy<ID, C, K, V> provide() {
+                return (RepublishStrategy<ID, C, K, V>) somniaRepublishStrategy;
+            }
+        };
+        return somniaRepublishStrategy;
     }
 
     @Bean(value = "somniaNodeSettings")

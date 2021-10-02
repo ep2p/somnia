@@ -18,4 +18,5 @@ public class SomniaKademliaSettingsProperties {
     private int findNodeSize = 20;
     private int joinBucketQueries = 1;
     private int maximumLastSeenAgeToConsiderAlive = 20;
+    private boolean enabledRepublishing = false;
 }

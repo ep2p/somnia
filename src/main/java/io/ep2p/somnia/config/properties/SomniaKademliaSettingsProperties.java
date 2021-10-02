@@ -1,6 +1,5 @@
 package io.ep2p.somnia.config.properties;
 
-import io.ep2p.kademlia.NodeSettings;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -19,6 +18,4 @@ public class SomniaKademliaSettingsProperties {
     private int findNodeSize = 20;
     private int joinBucketQueries = 1;
     private int maximumLastSeenAgeToConsiderAlive = 20;
-    private boolean enabledRepublishing = false;
-    private NodeSettings.RepublishSettings republishSettings = new NodeSettings.RepublishSettings();
 }

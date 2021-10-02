@@ -12,6 +12,7 @@ import io.ep2p.somnia.decentralized.*;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
 import io.ep2p.somnia.spring.configuration.LocalNodeConnectionApi;
+import io.ep2p.somnia.spring.mock.EmptyDistributionTaskHandler;
 import io.ep2p.somnia.spring.mock.SampleData;
 import io.ep2p.somnia.spring.mock.SampleSomniaEntity3;
 import io.ep2p.somnia.storage.DefaultInMemoryStorage;
@@ -47,7 +48,7 @@ public class DistributionTest {
         SomniaKademliaSyncRepositoryNode previousNode = null;
         for(int i = 0; i < this.nodeSize; i++){
             SomniaKademliaRepository somniaKademliaRepository = new SomniaKademliaRepository(somniaEntityManager, new DefaultInMemoryStorage(objectMapper), new DefaultInMemoryStorage(objectMapper));
-            SomniaKademliaSyncRepositoryNode node = new SomniaKademliaSyncRepositoryNode(BigInteger.valueOf(i), localNodeConnectionApi, new SomniaConnectionInfo(), NodeSettings.Default.build(), somniaKademliaRepository, somniaEntityManager, somniaStorageConfig);
+            SomniaKademliaSyncRepositoryNode node = new SomniaKademliaSyncRepositoryNode(BigInteger.valueOf(i), localNodeConnectionApi, new SomniaConnectionInfo(), NodeSettings.Default.build(), somniaKademliaRepository, somniaEntityManager, somniaStorageConfig, new EmptyDistributionTaskHandler());
             node.start();
             localNodeConnectionApi.registerNode(node);
             if (previousNode != null)

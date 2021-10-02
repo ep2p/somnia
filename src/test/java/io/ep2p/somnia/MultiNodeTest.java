@@ -8,11 +8,11 @@ import io.ep2p.kademlia.exception.BootstrapException;
 import io.ep2p.kademlia.exception.GetException;
 import io.ep2p.kademlia.exception.StoreException;
 import io.ep2p.kademlia.model.GetAnswer;
-import io.ep2p.kademlia.table.BigIntegerRoutingTable;
 import io.ep2p.somnia.decentralized.*;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
 import io.ep2p.somnia.spring.configuration.LocalNodeConnectionApi;
+import io.ep2p.somnia.spring.mock.EmptyDistributionTaskHandler;
 import io.ep2p.somnia.spring.mock.SampleData;
 import io.ep2p.somnia.spring.mock.SampleSomniaEntity;
 import io.ep2p.somnia.spring.mock.SampleSomniaEntity2;
@@ -44,8 +44,8 @@ public class MultiNodeTest {
         SomniaKademliaRepository somniaKademliaRepository2 = new SomniaKademliaRepository(somniaEntityManager, new DefaultInMemoryStorage(objectMapper), new DefaultInMemoryStorage(objectMapper));
 
 
-        this.node1 = new SomniaKademliaSyncRepositoryNode(node1Id, localNodeConnectionApi, new SomniaConnectionInfo(), NodeSettings.Default.build(), somniaKademliaRepository1, somniaEntityManager);
-        this.node2 = new SomniaKademliaSyncRepositoryNode(node2Id, localNodeConnectionApi, new SomniaConnectionInfo(), NodeSettings.Default.build(), somniaKademliaRepository2, somniaEntityManager);
+        this.node1 = new SomniaKademliaSyncRepositoryNode(node1Id, localNodeConnectionApi, new SomniaConnectionInfo(), NodeSettings.Default.build(), somniaKademliaRepository1, somniaEntityManager, new EmptyDistributionTaskHandler());
+        this.node2 = new SomniaKademliaSyncRepositoryNode(node2Id, localNodeConnectionApi, new SomniaConnectionInfo(), NodeSettings.Default.build(), somniaKademliaRepository2, somniaEntityManager, new EmptyDistributionTaskHandler());
         this.node1.start();
         this.node2.start();
         localNodeConnectionApi.registerNode(node1);

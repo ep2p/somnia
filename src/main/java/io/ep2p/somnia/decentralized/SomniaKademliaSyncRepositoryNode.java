@@ -16,6 +16,7 @@ import io.ep2p.kademlia.table.RoutingTable;
 import io.ep2p.somnia.annotation.SomniaDocument;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
+import io.ep2p.somnia.service.RedistributionTaskHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigInteger;
@@ -30,6 +31,7 @@ import static io.ep2p.kademlia.util.DateUtil.getDateOfSecondsAgo;
 public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode<BigInteger, SomniaConnectionInfo, SomniaKey, SomniaValue> {
     private final SomniaEntityManager somniaEntityManager;
     private final SomniaStorageConfig somniaStorageConfig;
+    private final RedistributionTaskHandler redistributionTaskHandler;
 
     public SomniaKademliaSyncRepositoryNode(
             BigInteger nodeId,
@@ -37,8 +39,8 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
             SomniaConnectionInfo connectionInfo,
             NodeSettings nodeSettings,
             KademliaRepository<SomniaKey, SomniaValue> kademliaRepository,
-            SomniaEntityManager somniaEntityManager) {
-        this(nodeId, nodeConnectionApi, connectionInfo, nodeSettings, kademliaRepository, somniaEntityManager, new SomniaStorageConfig());
+            SomniaEntityManager somniaEntityManager, RedistributionTaskHandler redistributionTaskHandler) {
+        this(nodeId, nodeConnectionApi, connectionInfo, nodeSettings, kademliaRepository, somniaEntityManager, new SomniaStorageConfig(), redistributionTaskHandler);
     }
 
     public SomniaKademliaSyncRepositoryNode(
@@ -47,7 +49,7 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
             SomniaConnectionInfo connectionInfo,
             NodeSettings nodeSettings,
             KademliaRepository<SomniaKey, SomniaValue> kademliaRepository,
-            SomniaEntityManager somniaEntityManager, SomniaStorageConfig somniaStorageConfig) {
+            SomniaEntityManager somniaEntityManager, SomniaStorageConfig somniaStorageConfig, RedistributionTaskHandler redistributionTaskHandler) {
         super(
                 nodeId,
                 nodeConnectionApi,
@@ -57,6 +59,7 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
                 new SomniaKeyHashGenerator());
         this.somniaEntityManager = somniaEntityManager;
         this.somniaStorageConfig = somniaStorageConfig;
+        this.redistributionTaskHandler = redistributionTaskHandler;
     }
 
     public SomniaKademliaSyncRepositoryNode(
@@ -67,8 +70,8 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
             SomniaConnectionInfo connectionInfo,
             NodeSettings nodeSettings,
             KademliaRepository<SomniaKey, SomniaValue> kademliaRepository,
-            SomniaEntityManager somniaEntityManager) {
-        this(nodeId, routingTable,nodeConnectionApi, connectionInfo, nodeSettings, kademliaRepository, somniaEntityManager, new SomniaStorageConfig());
+            SomniaEntityManager somniaEntityManager, RedistributionTaskHandler redistributionTaskHandler) {
+        this(nodeId, routingTable,nodeConnectionApi, connectionInfo, nodeSettings, kademliaRepository, somniaEntityManager, new SomniaStorageConfig(), redistributionTaskHandler);
     }
 
     public SomniaKademliaSyncRepositoryNode(
@@ -79,7 +82,7 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
             SomniaConnectionInfo connectionInfo,
             NodeSettings nodeSettings,
             KademliaRepository<SomniaKey, SomniaValue> kademliaRepository,
-            SomniaEntityManager somniaEntityManager, SomniaStorageConfig somniaStorageConfig) {
+            SomniaEntityManager somniaEntityManager, SomniaStorageConfig somniaStorageConfig, RedistributionTaskHandler redistributionTaskHandler) {
         super(
                 nodeId,
                 routingTable,
@@ -90,6 +93,7 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
                 new SomniaKeyHashGenerator());
         this.somniaEntityManager = somniaEntityManager;
         this.somniaStorageConfig = somniaStorageConfig;
+        this.redistributionTaskHandler = redistributionTaskHandler;
     }
 
     @Override
@@ -178,12 +182,17 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
 
     private StoreAnswer<BigInteger, SomniaKey> handleHitStore(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {
         if (this.getId().equals(key.getHash())) {
-            doStore(key, value);
-            return getNewStoreAnswer(key, StoreAnswer.Result.STORED, this);
+            doStore(key, value, requester);
         } else {
             // pass data to the closest node to store it
-            return storeInClosestNodes(requester, key, value, caller);
+            StoreAnswer<BigInteger, SomniaKey> storeAnswer = storeInClosestNodes(requester, key, value, caller);
+            if (storeAnswer.getResult().equals(StoreAnswer.Result.FAILED)){
+                doStore(key, value, requester);
+            }else {
+                return storeAnswer;
+            }
         }
+        return getNewStoreAnswer(key, StoreAnswer.Result.STORED, this);
     }
 
     private StoreAnswer<BigInteger, SomniaKey> handleDistributedStore(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {
@@ -196,13 +205,21 @@ public class SomniaKademliaSyncRepositoryNode extends KademliaSyncRepositoryNode
         return storeAnswer;
     }
 
-    private StoreAnswer<BigInteger, SomniaKey> doStore(SomniaKey key, SomniaValue value) {
+    protected StoreAnswer<BigInteger, SomniaKey> doStore(SomniaKey key, SomniaValue value) {
         try {
             getKademliaRepository().store(key, value);
             return getNewStoreAnswer(key, StoreAnswer.Result.STORED, this);
         }catch (Exception e){
             log.error("Failed to store data on kademlia. " + key, e);
             return getNewStoreAnswer(key, StoreAnswer.Result.FAILED, this);
+        }
+    }
+
+    protected void doStore(SomniaKey somniaKey, SomniaValue somniaValue, Node<BigInteger, SomniaConnectionInfo> requester){
+        if (somniaKey.isRepublish()){
+            this.redistributionTaskHandler.addTask(somniaKey, requester);
+        }else {
+            doStore(somniaKey, somniaValue);
         }
     }
 

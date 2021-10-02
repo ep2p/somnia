@@ -21,6 +21,7 @@ public class SomniaKey implements Serializable {
     private int distributions = 0;
     @Builder.Default
     private Meta meta = new Meta();
+    private boolean republish = false;
 
     public synchronized void incrementDistribution(){
         this.distributions++;
@@ -32,6 +33,7 @@ public class SomniaKey implements Serializable {
                 .key(this.getKey())
                 .name(this.getName())
                 .hash(this.getHash())
+                .republish(this.isRepublish())
                 .hitNode(this.getHitNode())
                 .meta(this.getMeta().makeClone())
                 .build();
@@ -69,7 +71,7 @@ public class SomniaKey implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SomniaKey somniaKey = (SomniaKey) o;
-        return Objects.equals(getKey(), somniaKey.getKey());
+        return key.equals(somniaKey.key) && name.equals(somniaKey.name);
     }
 
     @Override

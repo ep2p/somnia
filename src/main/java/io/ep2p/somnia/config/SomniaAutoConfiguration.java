@@ -18,8 +18,10 @@ import io.ep2p.somnia.config.serialization.ExternalNodeSerializer;
 import io.ep2p.somnia.decentralized.*;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
+import io.ep2p.somnia.service.DefaultRedistributionTaskHandler;
 import io.ep2p.somnia.service.EntityManagerRegisterer;
 import io.ep2p.somnia.service.HashGenerator;
+import io.ep2p.somnia.service.RedistributionTaskHandler;
 import io.ep2p.somnia.storage.DefaultInMemoryStorage;
 import io.ep2p.somnia.storage.MongoStorage;
 import io.ep2p.somnia.storage.Storage;
@@ -86,11 +88,20 @@ public class SomniaAutoConfiguration {
         return new DefaultSomniaEntityManager();
     }
 
+
     @Bean("somniaKademliaRepository")
     @ConditionalOnMissingBean(name = "somniaKademliaRepository")
     @DependsOn({"somniaEntityManager", "mongoStorage", "inMemoryStorage"})
     public KademliaRepository<SomniaKey, SomniaValue> kademliaRepository(SomniaEntityManager somniaEntityManager, Storage mongoStorage, Storage inMemoryStorage){
         return new SomniaKademliaRepository(somniaEntityManager, inMemoryStorage, mongoStorage);
+    }
+
+    @Bean("redistributionTaskHandler")
+    @DependsOn({"somniaKademliaRepository"})
+    public RedistributionTaskHandler redistributionTaskHandler(KademliaRepository<SomniaKey, SomniaValue> somniaKademliaRepository) {
+        DefaultRedistributionTaskHandler defaultRedistributionTaskHandler = new DefaultRedistributionTaskHandler();
+        defaultRedistributionTaskHandler.init(somniaKademliaRepository);
+        return defaultRedistributionTaskHandler;
     }
 
     @Bean(value = "somniaNodeSettings")
@@ -105,13 +116,12 @@ public class SomniaAutoConfiguration {
                 .alpha(somniaKademliaSettingsProperties.getAlpha())
                 .storeTimeout(somniaKademliaSettingsProperties.getStoreTimeout())
                 .bootstrapNodeCallTimeout(somniaKademliaSettingsProperties.getBootstrapNodeCallTimeout())
-                .enabledRepublishing(somniaKademliaSettingsProperties.isEnabledRepublishing())
-                .republishSettings(somniaKademliaSettingsProperties.getRepublishSettings())
+                .enabledRepublishing(false)
                 .build();
     }
 
     @Bean(value = "somniaKademliaSyncRepositoryNode", initMethod = "start")
-    @DependsOn({"somniaNodeId", "routingTable", "somniaConnectionInfo", "nodeConnectionApi", "somniaKademliaRepository", "somniaEntityManager", "somniaDecentralizedConfig"})
+    @DependsOn({"somniaNodeId", "routingTable", "somniaConnectionInfo", "nodeConnectionApi", "somniaKademliaRepository", "somniaEntityManager", "somniaDecentralizedConfig", "redistributionTaskHandler"})
     @ConditionalOnMissingBean(name = "somniaKademliaSyncRepositoryNode", value = SomniaKademliaSyncRepositoryNode.class)
     public SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode(
             BigInteger somniaNodeId,
@@ -120,8 +130,9 @@ public class SomniaAutoConfiguration {
             SomniaConnectionInfo somniaConnectionInfo,
             NodeSettings somniaNodeSettings,
             KademliaRepository<SomniaKey, SomniaValue> somniaKademliaRepository,
-            SomniaEntityManager somniaEntityManager, SomniaStorageConfig somniaDecentralizedSomniaStorageConfig){
-        return new SomniaKademliaSyncRepositoryNode(somniaNodeId, routingTable, nodeConnectionApi, somniaConnectionInfo, somniaNodeSettings, somniaKademliaRepository, somniaEntityManager, somniaDecentralizedSomniaStorageConfig);
+            SomniaEntityManager somniaEntityManager, SomniaStorageConfig somniaDecentralizedSomniaStorageConfig,
+            RedistributionTaskHandler redistributionTaskHandler){
+        return new SomniaKademliaSyncRepositoryNode(somniaNodeId, routingTable, nodeConnectionApi, somniaConnectionInfo, somniaNodeSettings, somniaKademliaRepository, somniaEntityManager, somniaDecentralizedSomniaStorageConfig, redistributionTaskHandler);
     }
 
     @Bean("somniaHashGenerator")

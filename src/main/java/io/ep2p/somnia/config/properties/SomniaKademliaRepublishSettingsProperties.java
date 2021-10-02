@@ -1,12 +1,10 @@
 package io.ep2p.somnia.config.properties;
 
 import io.ep2p.kademlia.NodeSettings;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "somnia.config.kademlia.republish")
-@Getter
-@Setter
+@Data
 public class SomniaKademliaRepublishSettingsProperties extends NodeSettings.RepublishSettings {
 }

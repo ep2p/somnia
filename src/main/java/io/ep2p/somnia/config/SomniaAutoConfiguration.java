@@ -99,9 +99,7 @@ public class SomniaAutoConfiguration {
     @Bean("redistributionTaskHandler")
     @DependsOn({"somniaKademliaRepository"})
     public RedistributionTaskHandler redistributionTaskHandler(KademliaRepository<SomniaKey, SomniaValue> somniaKademliaRepository) {
-        DefaultRedistributionTaskHandler defaultRedistributionTaskHandler = new DefaultRedistributionTaskHandler();
-        defaultRedistributionTaskHandler.init(somniaKademliaRepository);
-        return defaultRedistributionTaskHandler;
+        return new DefaultRedistributionTaskHandler();
     }
 
     @Bean(value = "somniaNodeSettings")
@@ -132,7 +130,9 @@ public class SomniaAutoConfiguration {
             KademliaRepository<SomniaKey, SomniaValue> somniaKademliaRepository,
             SomniaEntityManager somniaEntityManager, SomniaStorageConfig somniaDecentralizedSomniaStorageConfig,
             RedistributionTaskHandler redistributionTaskHandler){
-        return new SomniaKademliaSyncRepositoryNode(somniaNodeId, routingTable, nodeConnectionApi, somniaConnectionInfo, somniaNodeSettings, somniaKademliaRepository, somniaEntityManager, somniaDecentralizedSomniaStorageConfig, redistributionTaskHandler);
+        SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode = new SomniaKademliaSyncRepositoryNode(somniaNodeId, routingTable, nodeConnectionApi, somniaConnectionInfo, somniaNodeSettings, somniaKademliaRepository, somniaEntityManager, somniaDecentralizedSomniaStorageConfig, redistributionTaskHandler);
+        redistributionTaskHandler.init(somniaKademliaSyncRepositoryNode);
+        return somniaKademliaSyncRepositoryNode;
     }
 
     @Bean("somniaHashGenerator")

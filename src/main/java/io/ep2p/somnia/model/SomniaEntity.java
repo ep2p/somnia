@@ -22,4 +22,5 @@ public abstract class SomniaEntity<D extends Serializable> implements GenericObj
     private D data;
     private String key;
     private Date creationDate;
+    private Long valueHash;
 }

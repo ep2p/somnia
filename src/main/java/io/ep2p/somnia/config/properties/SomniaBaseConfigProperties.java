@@ -13,4 +13,5 @@ public class SomniaBaseConfigProperties {
     private String basePackage = null;
     @Builder.Default
     private String mongoKeyIndexName = "s_key_index";
+    private String mongoValueHashIndexName = "s_value_hash_index";
 }

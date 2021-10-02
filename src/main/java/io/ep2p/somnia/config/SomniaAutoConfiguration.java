@@ -56,6 +56,7 @@ public class SomniaAutoConfiguration {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
         objectMapper.registerModule(somniaSimpleModule);
         return objectMapper;
     }
@@ -68,11 +69,16 @@ public class SomniaAutoConfiguration {
                 .build();
     }
 
+    @Bean("somniaHashGenerator")
+    public HashGenerator hashGenerator(){
+        return new HashGenerator.DefaultHashGenerator();
+    }
+
     @Bean("mongoStorage")
     @ConditionalOnMissingBean(name = "mongoStorage")
-    @DependsOn({"mongoTemplate", "objectMapper"})
-    public Storage mongoStorage(MongoTemplate mongoTemplate, ObjectMapper objectMapper){
-        return new MongoStorage(mongoTemplate, objectMapper);
+    @DependsOn({"mongoTemplate", "objectMapper", "hashGenerator"})
+    public Storage mongoStorage(MongoTemplate mongoTemplate, ObjectMapper objectMapper, HashGenerator hashGenerator){
+        return new MongoStorage(mongoTemplate, objectMapper, hashGenerator);
     }
 
     @Bean("inMemoryStorage")
@@ -133,11 +139,6 @@ public class SomniaAutoConfiguration {
         SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode = new SomniaKademliaSyncRepositoryNode(somniaNodeId, routingTable, nodeConnectionApi, somniaConnectionInfo, somniaNodeSettings, somniaKademliaRepository, somniaEntityManager, somniaDecentralizedSomniaStorageConfig, redistributionTaskHandler);
         redistributionTaskHandler.init(somniaKademliaSyncRepositoryNode);
         return somniaKademliaSyncRepositoryNode;
-    }
-
-    @Bean("somniaHashGenerator")
-    public HashGenerator hashGenerator(){
-        return new HashGenerator.DefaultHashGenerator();
     }
 
     @Bean

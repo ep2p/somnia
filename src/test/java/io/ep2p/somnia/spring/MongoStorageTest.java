@@ -10,6 +10,7 @@ import io.ep2p.somnia.decentralized.SomniaConnectionInfo;
 import io.ep2p.somnia.decentralized.SomniaKademliaSyncRepositoryNode;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
+import io.ep2p.somnia.service.HashGenerator;
 import io.ep2p.somnia.spring.configuration.LocalNodeConnectionApi;
 import io.ep2p.somnia.spring.configuration.SomniaTestConfiguration;
 import io.ep2p.somnia.spring.mock.SampleData;
@@ -52,7 +53,7 @@ public class MongoStorageTest {
             mongoTemplate.remove(new Query(), collectionName);
         });
         ((LocalNodeConnectionApi<BigInteger>) nodeConnectionApi).registerNode(somniaKademliaSyncRepositoryNode);
-        this.mongoStorage = new MongoStorage(mongoTemplate, objectMapper);
+        this.mongoStorage = new MongoStorage(mongoTemplate, objectMapper, new HashGenerator.DefaultHashGenerator());
         this.objectMapper = objectMapper;
     }
 

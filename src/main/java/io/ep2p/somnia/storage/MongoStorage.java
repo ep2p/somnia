@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ep2p.somnia.model.SomniaEntity;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
+import io.ep2p.somnia.service.HashGenerator;
 import io.ep2p.somnia.util.QueryUtil;
 import lombok.SneakyThrows;
 import org.springframework.dao.DuplicateKeyException;
@@ -20,18 +21,24 @@ import java.util.List;
 public class MongoStorage implements Storage {
     private final MongoTemplate mongoTemplate;
     private final ObjectMapper objectMapper;
+    private final HashGenerator hashGenerator;
 
-    public MongoStorage(MongoTemplate mongoTemplate, ObjectMapper objectMapper) {
+    public MongoStorage(MongoTemplate mongoTemplate, ObjectMapper objectMapper, HashGenerator hashGenerator) {
         this.mongoTemplate = mongoTemplate;
         this.objectMapper = objectMapper;
+        this.hashGenerator = hashGenerator;
     }
 
     @SneakyThrows
     @Override
     public void store(Class<? extends SomniaEntity> classOfName, boolean uniqueKey, SomniaKey somniaKey, SomniaValue somniaValue) {
+        if (somniaValue.getCount() > 0){
+            throw new IllegalArgumentException("Default mongo storage implementation is incapable of storing list of values");
+        }
         SomniaEntity somniaEntity = classOfName.newInstance();
         Object o = objectMapper.readValue(somniaValue.getData().toString(), somniaEntity.getGenericClassType(0));
         somniaEntity.setData((Serializable) o);
+        somniaEntity.setValueHash(hashGenerator.hashSomniaValueData(somniaValue.getData().toString()));
         somniaEntity.setKey(somniaKey.getKeyAsString());
         somniaEntity.setCreationDate(new Date());
         if (uniqueKey){

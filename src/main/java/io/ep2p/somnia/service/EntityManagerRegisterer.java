@@ -97,12 +97,15 @@ public class EntityManagerRegisterer {
         if (somniaDocument.inMemory())
             return;
         log.info("Processing key indexing for " + aClass);
-        Index index = new Index("key", Sort.Direction.ASC).named(somniaBaseConfigProperties.getMongoKeyIndexName());
+        Index keyIndex = new Index("key", Sort.Direction.ASC).named(somniaBaseConfigProperties.getMongoKeyIndexName());
         if (somniaDocument.uniqueKey()) {
-            this.mongoTemplate.indexOps(aClass).ensureIndex(index.unique());
+            this.mongoTemplate.indexOps(aClass).ensureIndex(keyIndex.unique());
         }else {
-            this.mongoTemplate.indexOps(aClass).ensureIndex(index);
+            this.mongoTemplate.indexOps(aClass).ensureIndex(keyIndex);
         }
+
+        Index valueHashIndex = new Index("valueHash", Sort.Direction.ASC).named(somniaBaseConfigProperties.getMongoValueHashIndexName()).sparse();
+        this.mongoTemplate.indexOps(aClass).ensureIndex(valueHashIndex.unique());
 
     }
 }

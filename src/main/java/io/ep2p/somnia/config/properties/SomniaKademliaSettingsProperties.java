@@ -8,17 +8,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "somnia.config.kademlia")
 @Getter
 @Setter
-public class SomniaKademliaSettingsProperties {
-    private long bootstrapNodeCallTimeout = 100;
-    private long storeTimeout = 20;
-    private int alpha = 3;
-    private int identifierSize = 128;
-    private int referencedNodesUpdatePeriod = 30;
-    /* Maximum size of the buckets */
-    private int bucketSize = 20;
-    private int findNodeSize = 20;
-    private int joinBucketQueries = 1;
-    private int maximumLastSeenAgeToConsiderAlive = 20;
-    private boolean enabledRepublishing = false;
-    private NodeSettings.RepublishSettings republishSettings = new NodeSettings.RepublishSettings();
+public class SomniaKademliaSettingsProperties extends NodeSettings {
+    public SomniaKademliaSettingsProperties(NodeSettings nodeSettings) {
+        super(nodeSettings.alpha, nodeSettings.identifierSize, nodeSettings.bucketSize, nodeSettings.findNodeSize, nodeSettings.maximumLastSeenAgeToConsiderAlive, nodeSettings.pingScheduleTimeValue, nodeSettings.pingScheduleTimeUnit, nodeSettings.dhtExecutorPoolSize, nodeSettings.dhtCleanupExecutorPoolSize, nodeSettings.maximumStoreAndLookupTimeoutValue, nodeSettings.maximumStoreAndGetTimeoutTimeUnit, nodeSettings.enabledFirstStoreRequestForcePass);
+    }
+
+    public SomniaKademliaSettingsProperties() {
+    }
 }

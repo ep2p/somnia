@@ -42,7 +42,9 @@ public class SomniaKey implements Serializable {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Meta {
+        @Builder.Default
         private long offset = 0;
+        @Builder.Default
         private int limit = 20;
         private String query;
         private JsonNode data;

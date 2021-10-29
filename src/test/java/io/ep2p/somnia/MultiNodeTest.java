@@ -4,15 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ep2p.kademlia.NodeSettings;
-import io.ep2p.kademlia.exception.BootstrapException;
-import io.ep2p.kademlia.exception.GetException;
-import io.ep2p.kademlia.exception.StoreException;
-import io.ep2p.kademlia.model.GetAnswer;
+import io.ep2p.kademlia.model.LookupAnswer;
+import io.ep2p.kademlia.node.KeyHashGenerator;
 import io.ep2p.kademlia.table.BigIntegerRoutingTable;
 import io.ep2p.somnia.decentralized.*;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
-import io.ep2p.somnia.spring.configuration.LocalNodeConnectionApi;
+import io.ep2p.somnia.spring.configuration.TestMessageSenderAPI;
 import io.ep2p.somnia.spring.mock.SampleData;
 import io.ep2p.somnia.spring.mock.SampleSomniaEntity;
 import io.ep2p.somnia.spring.mock.SampleSomniaEntity2;
@@ -23,10 +21,11 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class MultiNodeTest {
-    private SomniaKademliaSyncRepositoryNode node1;
-    private SomniaKademliaSyncRepositoryNode node2;
+    private SomniaDHTKademliaNode node1;
+    private SomniaDHTKademliaNode node2;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
 
@@ -38,23 +37,31 @@ public class MultiNodeTest {
         SomniaEntityManager somniaEntityManager = new DefaultSomniaEntityManager();
         somniaEntityManager.register(SampleSomniaEntity.class);
         somniaEntityManager.register(SampleSomniaEntity2.class);
-        LocalNodeConnectionApi<BigInteger> localNodeConnectionApi = new LocalNodeConnectionApi<>();
+        TestMessageSenderAPI<BigInteger, SomniaConnectionInfo> messageSenderAPI = new TestMessageSenderAPI<>();
 
         SomniaKademliaRepository somniaKademliaRepository1 = new SomniaKademliaRepository(somniaEntityManager, new DefaultInMemoryStorage(objectMapper), new DefaultInMemoryStorage(objectMapper));
         SomniaKademliaRepository somniaKademliaRepository2 = new SomniaKademliaRepository(somniaEntityManager, new DefaultInMemoryStorage(objectMapper), new DefaultInMemoryStorage(objectMapper));
+        NodeSettings nodeSettings = NodeSettings.Default.build();
+
+        KeyHashGenerator<BigInteger, SomniaKey> keyHashGenerator = new KeyHashGenerator<BigInteger, SomniaKey>() {
+            @Override
+            public BigInteger generateHash(SomniaKey key) {
+                return key.getKey();
+            }
+        };
+        SomniaStorageConfig somniaStorageConfig = new SomniaStorageConfig();
 
 
-        this.node1 = new SomniaKademliaSyncRepositoryNode(node1Id, localNodeConnectionApi, new SomniaConnectionInfo(), NodeSettings.Default.build(), somniaKademliaRepository1, somniaEntityManager);
-        this.node2 = new SomniaKademliaSyncRepositoryNode(node2Id, localNodeConnectionApi, new SomniaConnectionInfo(), NodeSettings.Default.build(), somniaKademliaRepository2, somniaEntityManager);
-        this.node1.start();
+        this.node1 = new SomniaDHTKademliaNode(node1Id, new SomniaConnectionInfo(), new BigIntegerRoutingTable<>(node1Id, nodeSettings), messageSenderAPI, nodeSettings, somniaKademliaRepository1, keyHashGenerator, somniaEntityManager, somniaStorageConfig);
+        this.node2 = new SomniaDHTKademliaNode(node2Id, new SomniaConnectionInfo(), new BigIntegerRoutingTable<>(node1Id, nodeSettings), messageSenderAPI, nodeSettings, somniaKademliaRepository2, keyHashGenerator, somniaEntityManager, somniaStorageConfig);
         this.node2.start();
-        localNodeConnectionApi.registerNode(node1);
-        localNodeConnectionApi.registerNode(node2);
+        messageSenderAPI.registerNode(node1);
+        messageSenderAPI.registerNode(node2);
     }
 
     @Test
-    public void test_hit() throws BootstrapException, StoreException, GetException, JsonProcessingException {
-        this.node1.bootstrap(this.node2);
+    public void test_hit() throws JsonProcessingException, ExecutionException, InterruptedException {
+        this.node1.start(this.node2);
 
         this.node1.store(
                 SomniaKey.builder()
@@ -67,20 +74,19 @@ public class MultiNodeTest {
                                 .integerVal(2)
                                 .stringVal("store on node 2")
                                 .build()))
-                        .build(),
-                true
+                        .build()
         );
 
-        GetAnswer<BigInteger, SomniaKey, SomniaValue> getAnswer = this.node2.get(SomniaKey.builder()
+        LookupAnswer<BigInteger, SomniaKey, SomniaValue> lookupAnswer = this.node2.lookup(SomniaKey.builder()
                 .hash(BigInteger.valueOf(2))
                 .key(BigInteger.valueOf(2))
                 .name(SampleSomniaEntity.class.getName())
-                .build());
+                .build()).get();
 
-        Assertions.assertEquals(getAnswer.getResult(), GetAnswer.Result.FOUND);
-        Assertions.assertEquals(getAnswer.getValue().getCount(), 1);
+        Assertions.assertEquals(lookupAnswer.getResult(), LookupAnswer.Result.FOUND);
+        Assertions.assertEquals(lookupAnswer.getValue().getCount(), 1);
         List<SampleData> sampleDataList = this.objectMapper.readValue(
-                getAnswer.getValue().getData().toString(), new TypeReference<List<SampleData>>(){}
+                lookupAnswer.getValue().getData().toString(), new TypeReference<List<SampleData>>(){}
         );
         Assertions.assertEquals(sampleDataList.size(), 1);
         Assertions.assertEquals(sampleDataList.get(0).getIntegerVal(), 2);
@@ -88,8 +94,8 @@ public class MultiNodeTest {
     }
 
     @Test
-    public void test_distribute() throws BootstrapException, StoreException, GetException, JsonProcessingException {
-        this.node1.bootstrap(this.node2);
+    public void test_distribute() throws JsonProcessingException, ExecutionException, InterruptedException {
+        this.node1.start(this.node2);
 
         this.node1.store(
                 SomniaKey.builder()
@@ -102,36 +108,35 @@ public class MultiNodeTest {
                                 .integerVal(2)
                                 .stringVal("store on all")
                                 .build()))
-                        .build(),
-                true
+                        .build()
         );
 
-        GetAnswer<BigInteger, SomniaKey, SomniaValue> getAnswer = this.node2.get(SomniaKey.builder()
+        LookupAnswer<BigInteger, SomniaKey, SomniaValue> lookupAnswer = this.node2.lookup(SomniaKey.builder()
                 .hash(BigInteger.valueOf(2))
                 .key(BigInteger.valueOf(2))
                 .name(SampleSomniaEntity.class.getName())
-                .build());
+                .build()).get();
 
-        Assertions.assertEquals(getAnswer.getResult(), GetAnswer.Result.FOUND);
-        Assertions.assertEquals(getAnswer.getValue().getCount(), 1);
+        Assertions.assertEquals(lookupAnswer.getResult(), LookupAnswer.Result.FOUND);
+        Assertions.assertEquals(lookupAnswer.getValue().getCount(), 1);
         List<SampleData> sampleDataList = this.objectMapper.readValue(
-                getAnswer.getValue().getData().toString(), new TypeReference<List<SampleData>>(){}
+                lookupAnswer.getValue().getData().toString(), new TypeReference<List<SampleData>>(){}
         );
         Assertions.assertEquals(sampleDataList.size(), 1);
         Assertions.assertEquals(sampleDataList.get(0).getIntegerVal(), 2);
         Assertions.assertEquals(sampleDataList.get(0).getStringVal(), "store on all");
 
 
-        getAnswer = this.node1.get(SomniaKey.builder()
+        lookupAnswer = this.node1.lookup(SomniaKey.builder()
                 .hash(BigInteger.valueOf(2))
                 .key(BigInteger.valueOf(2))
                 .name(SampleSomniaEntity.class.getName())
-                .build());
+                .build()).get();
 
-        Assertions.assertEquals(getAnswer.getResult(), GetAnswer.Result.FOUND);
-        Assertions.assertEquals(getAnswer.getValue().getCount(), 1);
+        Assertions.assertEquals(lookupAnswer.getResult(), LookupAnswer.Result.FOUND);
+        Assertions.assertEquals(lookupAnswer.getValue().getCount(), 1);
         sampleDataList = this.objectMapper.readValue(
-                getAnswer.getValue().getData().toString(), new TypeReference<List<SampleData>>(){}
+                lookupAnswer.getValue().getData().toString(), new TypeReference<List<SampleData>>(){}
         );
         Assertions.assertEquals(sampleDataList.size(), 1);
         Assertions.assertEquals(sampleDataList.get(0).getIntegerVal(), 2);

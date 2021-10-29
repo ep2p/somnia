@@ -1,14 +1,11 @@
 package io.ep2p.somnia.decentralized;
 
-import io.ep2p.kademlia.node.KademliaRepository;
+import io.ep2p.kademlia.repository.KademliaRepository;
 import io.ep2p.somnia.annotation.SomniaDocument;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
 import io.ep2p.somnia.storage.Storage;
 import lombok.SneakyThrows;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SomniaKademliaRepository implements KademliaRepository<SomniaKey, SomniaValue> {
     private final SomniaEntityManager somniaEntityManager;
@@ -57,10 +54,5 @@ public class SomniaKademliaRepository implements KademliaRepository<SomniaKey, S
         } else {
             return mongoStorage.contains(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaKey);
         }
-    }
-
-    @Override
-    public List<SomniaKey> getKeys() {
-        return new ArrayList<>();
     }
 }

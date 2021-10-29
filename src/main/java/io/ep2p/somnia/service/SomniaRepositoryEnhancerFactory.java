@@ -3,12 +3,10 @@ package io.ep2p.somnia.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.ep2p.kademlia.exception.GetException;
-import io.ep2p.kademlia.exception.StoreException;
-import io.ep2p.kademlia.model.GetAnswer;
+import io.ep2p.kademlia.model.LookupAnswer;
 import io.ep2p.kademlia.model.StoreAnswer;
+import io.ep2p.somnia.decentralized.SomniaDHTKademliaNode;
 import io.ep2p.somnia.decentralized.SomniaEntityManager;
-import io.ep2p.somnia.decentralized.SomniaKademliaSyncRepositoryNode;
 import io.ep2p.somnia.model.RepositoryResponse;
 import io.ep2p.somnia.model.SomniaEntity;
 import io.ep2p.somnia.model.SomniaKey;
@@ -25,17 +23,19 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 public class SomniaRepositoryEnhancerFactory {
-    private final SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode;
+    private final SomniaDHTKademliaNode somniaDHTKademliaNode;
     private final HashGenerator hashGenerator;
     private final ObjectMapper objectMapper;
     private final SomniaEntityManager somniaEntityManager;
 
-    public SomniaRepositoryEnhancerFactory(SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode, HashGenerator hashGenerator, ObjectMapper objectMapper, SomniaEntityManager somniaEntityManager) {
-        this.somniaKademliaSyncRepositoryNode = somniaKademliaSyncRepositoryNode;
+    public SomniaRepositoryEnhancerFactory(SomniaDHTKademliaNode somniaDHTKademliaNode, HashGenerator hashGenerator, ObjectMapper objectMapper, SomniaEntityManager somniaEntityManager) {
+        this.somniaDHTKademliaNode = somniaDHTKademliaNode;
         this.hashGenerator = hashGenerator;
         this.objectMapper = objectMapper;
         this.somniaEntityManager = somniaEntityManager;
@@ -105,13 +105,13 @@ public class SomniaRepositoryEnhancerFactory {
 
         StoreAnswer<BigInteger, SomniaKey> storeAnswer = null;
         try {
-            storeAnswer = this.somniaKademliaSyncRepositoryNode.store(somniaKey, somniaValue, true);
+            storeAnswer = this.somniaDHTKademliaNode.store(somniaKey, somniaValue).get();
             StoreAnswer.Result result = storeAnswer.getResult();
             if (result == StoreAnswer.Result.FAILED || result == StoreAnswer.Result.TIMEOUT){
                 log.error("Failed to store data with key " + somniaKey + " result: " + result);
                 return RepositoryResponse.builder().build();
             }
-        } catch (StoreException e) {
+        } catch (ExecutionException | InterruptedException e) {
             log.error("Failed to store data into somnia", e);
             return RepositoryResponse.builder().build();
         }
@@ -178,15 +178,15 @@ public class SomniaRepositoryEnhancerFactory {
     }
 
     private RepositoryResponse<?> find(SomniaKey somniaKey, Class<?> dataType) throws JsonProcessingException {
-        GetAnswer<BigInteger, SomniaKey, SomniaValue> getAnswer = null;
+        LookupAnswer<BigInteger, SomniaKey, SomniaValue> getAnswer = null;
         try {
-            getAnswer = this.somniaKademliaSyncRepositoryNode.get(somniaKey, 30, TimeUnit.SECONDS);
-            GetAnswer.Result result = getAnswer.getResult();
-            if (result == GetAnswer.Result.FAILED || result == GetAnswer.Result.TIMEOUT){
+            getAnswer = this.somniaDHTKademliaNode.lookup(somniaKey).get(30, TimeUnit.SECONDS);
+            LookupAnswer.Result result = getAnswer.getResult();
+            if (result == LookupAnswer.Result.FAILED || result == LookupAnswer.Result.TIMEOUT){
                 log.error("Failed to find data with key " + somniaKey + " result: " + result);
                 return RepositoryResponse.builder().build();
             }
-        } catch (GetException e) {
+        } catch (ExecutionException | InterruptedException | TimeoutException e) {
             log.error("Failed to find data with key " + somniaKey, e);
         }
 

@@ -4,15 +4,14 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import io.ep2p.kademlia.NodeSettings;
-import io.ep2p.kademlia.connection.NodeConnectionApi;
-import io.ep2p.kademlia.node.KademliaRepository;
+import io.ep2p.kademlia.connection.MessageSender;
+import io.ep2p.kademlia.node.KeyHashGenerator;
 import io.ep2p.kademlia.node.external.ExternalNode;
+import io.ep2p.kademlia.repository.KademliaRepository;
 import io.ep2p.kademlia.table.Bucket;
 import io.ep2p.kademlia.table.RoutingTable;
 import io.ep2p.somnia.config.properties.SomniaBaseConfigProperties;
 import io.ep2p.somnia.config.properties.SomniaDecentralizedConfigProperties;
-import io.ep2p.somnia.config.properties.SomniaKademliaRepublishSettingsProperties;
 import io.ep2p.somnia.config.properties.SomniaKademliaSettingsProperties;
 import io.ep2p.somnia.config.serialization.ExternalNodeDeserializer;
 import io.ep2p.somnia.config.serialization.ExternalNodeSerializer;
@@ -40,8 +39,7 @@ import java.math.BigInteger;
     {
         SomniaBaseConfigProperties.class,
         SomniaDecentralizedConfigProperties.class,
-        SomniaKademliaSettingsProperties.class,
-        SomniaKademliaRepublishSettingsProperties.class
+        SomniaKademliaSettingsProperties.class
     }
 )
 @EnableMongoRepositories
@@ -101,35 +99,31 @@ public class SomniaAutoConfiguration {
         return new SomniaKademliaRepository(somniaEntityManager, inMemoryStorage, mongoStorage);
     }
 
-    @Bean(value = "somniaNodeSettings")
-    public NodeSettings somniaNodeSettings(SomniaKademliaSettingsProperties somniaKademliaSettingsProperties, SomniaKademliaRepublishSettingsProperties somniaKademliaRepublishSettingsProperties){
-        return NodeSettings.builder()
-                .maximumLastSeenAgeToConsiderAlive(somniaKademliaSettingsProperties.getMaximumLastSeenAgeToConsiderAlive())
-                .findNodeSize(somniaKademliaSettingsProperties.getFindNodeSize())
-                .joinBucketQueries(somniaKademliaSettingsProperties.getJoinBucketQueries())
-                .bucketSize(somniaKademliaSettingsProperties.getBucketSize())
-                .referencedNodesUpdatePeriod(somniaKademliaSettingsProperties.getReferencedNodesUpdatePeriod())
-                .identifierSize(somniaKademliaSettingsProperties.getIdentifierSize())
-                .alpha(somniaKademliaSettingsProperties.getAlpha())
-                .storeTimeout(somniaKademliaSettingsProperties.getStoreTimeout())
-                .bootstrapNodeCallTimeout(somniaKademliaSettingsProperties.getBootstrapNodeCallTimeout())
-                .enabledRepublishing(somniaKademliaSettingsProperties.isEnabledRepublishing())
-                .republishSettings(somniaKademliaRepublishSettingsProperties)
-                .build();
+    @Bean(value = "somniaKeyHashGenerator")
+    @ConditionalOnMissingBean(KeyHashGenerator.class)
+    public KeyHashGenerator<BigInteger, SomniaKey> somniaKeyHashGenerator(){
+        return new KeyHashGenerator<BigInteger, SomniaKey>() {
+            @Override
+            public BigInteger generateHash(SomniaKey key) {
+                return key.getKey();
+            }
+        };
     }
 
-    @Bean(value = "somniaKademliaSyncRepositoryNode", initMethod = "start")
-    @DependsOn({"somniaNodeId", "routingTable", "somniaConnectionInfo", "nodeConnectionApi", "somniaKademliaRepository", "somniaEntityManager", "somniaDecentralizedConfig"})
-    @ConditionalOnMissingBean(name = "somniaKademliaSyncRepositoryNode", value = SomniaKademliaSyncRepositoryNode.class)
-    public SomniaKademliaSyncRepositoryNode somniaKademliaSyncRepositoryNode(
+    @Bean(value = "somniaDHTKademliaNode", initMethod = "start")
+    @DependsOn({"somniaNodeId", "routingTable", "somniaConnectionInfo", "somniaMessageSender", "somniaKademliaRepository", "somniaKeyHashGenerator", "somniaEntityManager", "somniaDecentralizedConfig"})
+    @ConditionalOnMissingBean(name = "somniaDHTKademliaNode", value = SomniaDHTKademliaNode.class)
+    public SomniaDHTKademliaNode somniaDHTKademliaNode(
             BigInteger somniaNodeId,
             RoutingTable<BigInteger, SomniaConnectionInfo, Bucket<BigInteger, SomniaConnectionInfo>> routingTable,
-            NodeConnectionApi<BigInteger, SomniaConnectionInfo> nodeConnectionApi,
+            MessageSender<BigInteger, SomniaConnectionInfo> somniaMessageSender,
             SomniaConnectionInfo somniaConnectionInfo,
-            NodeSettings somniaNodeSettings,
+            SomniaKademliaSettingsProperties somniaKademliaSettingsProperties,
             KademliaRepository<SomniaKey, SomniaValue> somniaKademliaRepository,
-            SomniaEntityManager somniaEntityManager, SomniaStorageConfig somniaDecentralizedSomniaStorageConfig){
-        return new SomniaKademliaSyncRepositoryNode(somniaNodeId, routingTable, nodeConnectionApi, somniaConnectionInfo, somniaNodeSettings, somniaKademliaRepository, somniaEntityManager, somniaDecentralizedSomniaStorageConfig);
+            KeyHashGenerator<BigInteger, SomniaKey> somniaKeyHashGenerator,
+            SomniaEntityManager somniaEntityManager,
+            SomniaStorageConfig somniaDecentralizedSomniaStorageConfig){
+        return new SomniaDHTKademliaNode(somniaNodeId, somniaConnectionInfo, routingTable, somniaMessageSender, somniaKademliaSettingsProperties, somniaKademliaRepository, somniaKeyHashGenerator, somniaEntityManager, somniaDecentralizedSomniaStorageConfig);
     }
 
     @Bean("somniaHashGenerator")

@@ -12,10 +12,10 @@
     </parent>
 
     <groupId>io.ep2p</groupId>
-    <artifactId>somnia</artifactId>
-    <version>0.8.0-SNAPSHOT-1</version>
+    <artifactId>somnia-core</artifactId>
+    <version>0.8.0-SNAPSHOT-2</version>
     <name>Somnia Decentralized Storage Library</name>
-    <description>Decentralized storage with private trust. Powered by Spring Boot, MongoDB and Kademlia algorithm.</description>
+    <description>Private decentralized storage and network. Powered by Spring Boot and Kademlia algorithm.</description>
     <url>https://github.com/ep2p/somnia</url>
     <packaging>jar</packaging>
 
@@ -38,7 +38,7 @@
     <scm>
         <connection>scm:git:git://github.com/ep2p/somnia.git</connection>
         <developerConnection>scm:git:ssh://github.com:ep2p/somnia.git</developerConnection>
-        <url>http://github.com/ep2p/somnia/tree/main</url>
+        <url>https://github.com/ep2p/somnia/tree/main</url>
     </scm>
 
     <properties>
@@ -78,11 +78,6 @@
             <groupId>io.ep2p</groupId>
             <artifactId>kademlia-api</artifactId>
             <version>4.0.6-SNAPSHOT-2</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
 
         <dependency>
@@ -131,6 +126,11 @@
         </dependency>
 
         <!-- test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>de.flapdoodle.embed</groupId>
             <artifactId>de.flapdoodle.embed.mongo</artifactId>

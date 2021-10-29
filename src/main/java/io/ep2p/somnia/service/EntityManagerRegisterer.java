@@ -11,9 +11,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.index.Index;
 
 import javax.annotation.PostConstruct;
 import java.util.HashSet;
@@ -22,13 +19,11 @@ import java.util.Set;
 
 @Slf4j
 public class EntityManagerRegisterer {
-    private final MongoTemplate mongoTemplate;
     private final SomniaEntityManager somniaEntityManager;
     private final SomniaBaseConfigProperties somniaBaseConfigProperties;
     private final ApplicationContext applicationContext;
 
-    public EntityManagerRegisterer(MongoTemplate mongoTemplate, SomniaEntityManager somniaEntityManager, SomniaBaseConfigProperties somniaBaseConfigProperties, ApplicationContext applicationContext) {
-        this.mongoTemplate = mongoTemplate;
+    public EntityManagerRegisterer(SomniaEntityManager somniaEntityManager, SomniaBaseConfigProperties somniaBaseConfigProperties, ApplicationContext applicationContext) {
         this.somniaEntityManager = somniaEntityManager;
         this.somniaBaseConfigProperties = somniaBaseConfigProperties;
         this.applicationContext = applicationContext;
@@ -82,27 +77,10 @@ public class EntityManagerRegisterer {
                 Class<?> aClass = Class.forName(bd.getBeanClassName());
                 SomniaDocument somniaDocument = aClass.getAnnotation(SomniaDocument.class);
                 if (somniaDocument != null){
-                    processMongo(somniaDocument, aClass);
-                    processEntityManager(aClass);
+                    somniaEntityManager.register((Class<SomniaEntity<?>>) aClass);
                 }
             }
         }
     }
 
-    private void processEntityManager(Class<?> aClass) {
-        somniaEntityManager.register((Class<SomniaEntity<?>>) aClass);
-    }
-
-    private void processMongo(SomniaDocument somniaDocument, Class<?> aClass){
-        if (somniaDocument.inMemory())
-            return;
-        log.info("Processing key indexing for " + aClass);
-        Index index = new Index("key", Sort.Direction.ASC).named(somniaBaseConfigProperties.getMongoKeyIndexName());
-        if (somniaDocument.uniqueKey()) {
-            this.mongoTemplate.indexOps(aClass).ensureIndex(index.unique());
-        }else {
-            this.mongoTemplate.indexOps(aClass).ensureIndex(index);
-        }
-
-    }
 }

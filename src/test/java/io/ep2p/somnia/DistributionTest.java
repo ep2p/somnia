@@ -13,7 +13,7 @@ import io.ep2p.somnia.model.SomniaValue;
 import io.ep2p.somnia.spring.configuration.TestMessageSenderAPI;
 import io.ep2p.somnia.spring.mock.SampleData;
 import io.ep2p.somnia.spring.mock.SampleSomniaEntity3;
-import io.ep2p.somnia.storage.DefaultInMemoryStorage;
+import io.ep2p.somnia.storage.DefaultCacheStorage;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
 import org.junit.jupiter.api.Assertions;
@@ -58,7 +58,7 @@ public class DistributionTest {
 
         SomniaDHTKademliaNode previousNode = null;
         for(int i = 0; i < this.nodeSize; i++){
-            SomniaKademliaRepository somniaKademliaRepository = new SomniaKademliaRepository(somniaEntityManager, new DefaultInMemoryStorage(objectMapper), new DefaultInMemoryStorage(objectMapper));
+            SomniaKademliaRepository somniaKademliaRepository = new SomniaKademliaRepository(somniaEntityManager, new DefaultCacheStorage(objectMapper), new DefaultCacheStorage(objectMapper));
             var node = new SomniaDHTKademliaNode(BigInteger.valueOf(i), new SomniaConnectionInfo(), new BigIntegerRoutingTable<>(BigInteger.valueOf(i), nodeSettings), messageSenderAPI, nodeSettings, somniaKademliaRepository, keyHashGenerator, somniaEntityManager, somniaStorageConfig);
             messageSenderAPI.registerNode(node);
             if (previousNode != null)

@@ -1,5 +1,6 @@
 package io.ep2p.somnia.spring.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ep2p.kademlia.NodeSettings;
 import io.ep2p.kademlia.connection.MessageSender;
 import io.ep2p.kademlia.table.BigIntegerRoutingTable;
@@ -9,10 +10,13 @@ import io.ep2p.somnia.config.properties.SomniaBaseConfigProperties;
 import io.ep2p.somnia.config.properties.SomniaDecentralizedConfigProperties;
 import io.ep2p.somnia.config.properties.SomniaKademliaSettingsProperties;
 import io.ep2p.somnia.decentralized.SomniaConnectionInfo;
+import io.ep2p.somnia.spring.MongoDatabaseStorage;
+import io.ep2p.somnia.storage.Storage;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.math.BigInteger;
 
@@ -54,6 +58,11 @@ public class SomniaTestConfiguration {
     @Bean("somniaMessageSender")
     public MessageSender<BigInteger, SomniaConnectionInfo> somniaMessageSender(){
         return new TestMessageSenderAPI<>();
+    }
+
+    @Bean("databaseStorage")
+    public Storage databaseStorage(MongoTemplate mongoTemplate, ObjectMapper objectMapper){
+        return new MongoDatabaseStorage(mongoTemplate, objectMapper);
     }
 
 }

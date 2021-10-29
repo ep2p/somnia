@@ -9,13 +9,13 @@ import lombok.SneakyThrows;
 
 public class SomniaKademliaRepository implements KademliaRepository<SomniaKey, SomniaValue> {
     private final SomniaEntityManager somniaEntityManager;
-    private final Storage inMemoryStorage;
-    private final Storage mongoStorage;
+    private final Storage cacheStorage;
+    private final Storage databaseStorage;
 
-    public SomniaKademliaRepository(SomniaEntityManager somniaEntityManager, Storage inMemoryStorage, Storage mongoStorage) {
+    public SomniaKademliaRepository(SomniaEntityManager somniaEntityManager, Storage cacheStorage, Storage databaseStorage) {
         this.somniaEntityManager = somniaEntityManager;
-        this.inMemoryStorage = inMemoryStorage;
-        this.mongoStorage = mongoStorage;
+        this.cacheStorage = cacheStorage;
+        this.databaseStorage = databaseStorage;
     }
 
     @SneakyThrows
@@ -23,9 +23,9 @@ public class SomniaKademliaRepository implements KademliaRepository<SomniaKey, S
     public void store(SomniaKey somniaKey, SomniaValue somniaValue) {
         SomniaDocument somniaDocument = somniaEntityManager.getDocumentOfName(somniaKey.getName()).get();
         if (somniaDocument.inMemory()) {
-            inMemoryStorage.store(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaDocument.uniqueKey(), somniaKey, somniaValue);
+            cacheStorage.store(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaDocument.uniqueKey(), somniaKey, somniaValue);
         }else {
-            mongoStorage.store(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaDocument.uniqueKey(), somniaKey, somniaValue);
+            databaseStorage.store(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaDocument.uniqueKey(), somniaKey, somniaValue);
         }
     }
 
@@ -34,9 +34,9 @@ public class SomniaKademliaRepository implements KademliaRepository<SomniaKey, S
     public SomniaValue get(SomniaKey somniaKey) {
         SomniaDocument somniaDocument = somniaEntityManager.getDocumentOfName(somniaKey.getName()).get();
         if (somniaDocument.inMemory()){
-            return inMemoryStorage.get(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaKey);
+            return cacheStorage.get(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaKey);
         } else {
-            return mongoStorage.get(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaKey);
+            return databaseStorage.get(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaKey);
         }
     }
 
@@ -50,9 +50,9 @@ public class SomniaKademliaRepository implements KademliaRepository<SomniaKey, S
     public boolean contains(SomniaKey somniaKey) {
         SomniaDocument somniaDocument = somniaEntityManager.getDocumentOfName(somniaKey.getName()).get();
         if (somniaDocument.inMemory()){
-            return inMemoryStorage.contains(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaKey);
+            return cacheStorage.contains(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaKey);
         } else {
-            return mongoStorage.contains(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaKey);
+            return databaseStorage.contains(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaKey);
         }
     }
 }

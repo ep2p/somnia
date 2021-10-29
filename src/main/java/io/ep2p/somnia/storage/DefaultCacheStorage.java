@@ -12,15 +12,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DefaultInMemoryStorage implements Storage {
+public class DefaultCacheStorage implements Storage {
     private final Map<BigInteger, SomniaValue> map = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper;
 
-    public DefaultInMemoryStorage(ObjectMapper objectMapper) {
+    public DefaultCacheStorage(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
-    public DefaultInMemoryStorage(){
+    public DefaultCacheStorage(){
         this.objectMapper = new ObjectMapper();
     }
 

@@ -14,7 +14,7 @@ import io.ep2p.somnia.spring.configuration.TestMessageSenderAPI;
 import io.ep2p.somnia.spring.mock.SampleData;
 import io.ep2p.somnia.spring.mock.SampleSomniaEntity;
 import io.ep2p.somnia.spring.mock.SampleSomniaEntity2;
-import io.ep2p.somnia.storage.DefaultInMemoryStorage;
+import io.ep2p.somnia.storage.DefaultCacheStorage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,8 +39,8 @@ public class MultiNodeTest {
         somniaEntityManager.register(SampleSomniaEntity2.class);
         TestMessageSenderAPI<BigInteger, SomniaConnectionInfo> messageSenderAPI = new TestMessageSenderAPI<>();
 
-        SomniaKademliaRepository somniaKademliaRepository1 = new SomniaKademliaRepository(somniaEntityManager, new DefaultInMemoryStorage(objectMapper), new DefaultInMemoryStorage(objectMapper));
-        SomniaKademliaRepository somniaKademliaRepository2 = new SomniaKademliaRepository(somniaEntityManager, new DefaultInMemoryStorage(objectMapper), new DefaultInMemoryStorage(objectMapper));
+        SomniaKademliaRepository somniaKademliaRepository1 = new SomniaKademliaRepository(somniaEntityManager, new DefaultCacheStorage(objectMapper), new DefaultCacheStorage(objectMapper));
+        SomniaKademliaRepository somniaKademliaRepository2 = new SomniaKademliaRepository(somniaEntityManager, new DefaultCacheStorage(objectMapper), new DefaultCacheStorage(objectMapper));
         NodeSettings nodeSettings = NodeSettings.Default.build();
 
         KeyHashGenerator<BigInteger, SomniaKey> keyHashGenerator = new KeyHashGenerator<BigInteger, SomniaKey>() {

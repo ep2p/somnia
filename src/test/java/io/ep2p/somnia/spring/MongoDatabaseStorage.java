@@ -1,10 +1,11 @@
-package io.ep2p.somnia.storage;
+package io.ep2p.somnia.spring;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ep2p.somnia.model.SomniaEntity;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
+import io.ep2p.somnia.storage.Storage;
 import io.ep2p.somnia.util.QueryUtil;
 import lombok.SneakyThrows;
 import org.springframework.dao.DuplicateKeyException;
@@ -17,11 +18,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MongoStorage implements Storage {
+public class MongoDatabaseStorage implements Storage {
     private final MongoTemplate mongoTemplate;
     private final ObjectMapper objectMapper;
 
-    public MongoStorage(MongoTemplate mongoTemplate, ObjectMapper objectMapper) {
+    public MongoDatabaseStorage(MongoTemplate mongoTemplate, ObjectMapper objectMapper) {
         this.mongoTemplate = mongoTemplate;
         this.objectMapper = objectMapper;
     }

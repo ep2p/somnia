@@ -20,8 +20,7 @@ import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
 import io.ep2p.somnia.service.EntityManagerRegisterer;
 import io.ep2p.somnia.service.HashGenerator;
-import io.ep2p.somnia.storage.DefaultInMemoryStorage;
-import io.ep2p.somnia.storage.MongoStorage;
+import io.ep2p.somnia.storage.DefaultCacheStorage;
 import io.ep2p.somnia.storage.Storage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -29,7 +28,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import java.math.BigInteger;
@@ -72,18 +70,11 @@ public class SomniaAutoConfiguration {
                 .build();
     }
 
-    @Bean("mongoStorage")
-    @ConditionalOnMissingBean(name = "mongoStorage")
-    @DependsOn({"mongoTemplate", "objectMapper"})
-    public Storage mongoStorage(MongoTemplate mongoTemplate, ObjectMapper objectMapper){
-        return new MongoStorage(mongoTemplate, objectMapper);
-    }
-
-    @Bean("inMemoryStorage")
-    @ConditionalOnMissingBean(name = "inMemoryStorage")
+    @Bean("cacheStorage")
+    @ConditionalOnMissingBean(name = "cacheStorage")
     @DependsOn("objectMapper")
-    public Storage inMemoryStorage(ObjectMapper objectMapper){
-        return new DefaultInMemoryStorage(objectMapper);
+    public Storage cacheStorage(ObjectMapper objectMapper){
+        return new DefaultCacheStorage(objectMapper);
     }
 
     @Bean("somniaEntityManager")
@@ -94,9 +85,9 @@ public class SomniaAutoConfiguration {
 
     @Bean("somniaKademliaRepository")
     @ConditionalOnMissingBean(name = "somniaKademliaRepository")
-    @DependsOn({"somniaEntityManager", "mongoStorage", "inMemoryStorage"})
-    public KademliaRepository<SomniaKey, SomniaValue> kademliaRepository(SomniaEntityManager somniaEntityManager, Storage mongoStorage, Storage inMemoryStorage){
-        return new SomniaKademliaRepository(somniaEntityManager, inMemoryStorage, mongoStorage);
+    @DependsOn({"somniaEntityManager", "databaseStorage", "cacheStorage"})
+    public KademliaRepository<SomniaKey, SomniaValue> kademliaRepository(SomniaEntityManager somniaEntityManager, Storage databaseStorage, Storage cacheStorage){
+        return new SomniaKademliaRepository(somniaEntityManager, cacheStorage, databaseStorage);
     }
 
     @Bean(value = "somniaKeyHashGenerator")
@@ -132,8 +123,8 @@ public class SomniaAutoConfiguration {
     }
 
     @Bean
-    public EntityManagerRegisterer entityManagerRegisterer(MongoTemplate mongoTemplate, SomniaEntityManager somniaEntityManager, SomniaBaseConfigProperties somniaBaseConfigProperties, ApplicationContext applicationContext){
-        return new EntityManagerRegisterer(mongoTemplate, somniaEntityManager, somniaBaseConfigProperties, applicationContext);
+    public EntityManagerRegisterer entityManagerRegisterer(SomniaEntityManager somniaEntityManager, SomniaBaseConfigProperties somniaBaseConfigProperties, ApplicationContext applicationContext){
+        return new EntityManagerRegisterer(somniaEntityManager, somniaBaseConfigProperties, applicationContext);
     }
 
 }

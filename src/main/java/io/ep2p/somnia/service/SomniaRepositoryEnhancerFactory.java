@@ -63,7 +63,7 @@ public class SomniaRepositoryEnhancerFactory {
 
                 assert through != null;
 
-                somniaEntityManager.register((Class<? extends SomniaEntity<?>>) through);
+                somniaEntityManager.register((Class<? extends SomniaEntity<?, ?>>) through);
                 switch (method.getName()){
                     case "save":
                         assert args.length == 2 && args[0] instanceof BigInteger && args[1] instanceof Serializable;

@@ -13,5 +13,5 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter
 @Setter
 @NoArgsConstructor
-public class SampleSomniaEntity3 extends SomniaEntity<SampleData> {
+public class SampleSomniaEntity3 extends MongoSomniaEntity<SampleData> {
 }

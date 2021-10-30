@@ -13,7 +13,7 @@ import java.math.BigInteger;
  * @param <D> Data type
  * @param <T> Entity to work with the data through it (SomniaEntity<D>)
  */
-public interface SomniaRepository<D extends Serializable, T extends SomniaEntity<?>> {
+public interface SomniaRepository<D extends Serializable, T extends SomniaEntity<?, ?>> {
     RepositoryResponse<D> save(BigInteger id, D data);
     RepositoryResponse<D> findOne(BigInteger id);
     RepositoryResponse<D> findAll(BigInteger id);

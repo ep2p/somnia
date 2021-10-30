@@ -16,7 +16,7 @@ public class GenericObjTest {
         Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, new Executable() {
             @Override
             public void execute() throws Throwable {
-                sampleSomniaEntity.getGenericClassType(1);
+                sampleSomniaEntity.getGenericClassType(2);
             }
         });
     }

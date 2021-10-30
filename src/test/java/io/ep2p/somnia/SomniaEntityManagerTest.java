@@ -5,9 +5,11 @@ import io.ep2p.somnia.decentralized.DefaultSomniaEntityManager;
 import io.ep2p.somnia.decentralized.SomniaEntityManager;
 import io.ep2p.somnia.model.EntityType;
 import io.ep2p.somnia.model.SomniaEntity;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.util.Optional;
 
 public class SomniaEntityManagerTest {
@@ -18,7 +20,7 @@ public class SomniaEntityManagerTest {
     }
 
     @SomniaDocument(inMemory = true, type = EntityType.HIT, uniqueKey = true)
-    private static class SampleSomniaEntity extends SomniaEntity<String> {}
+    private static class SampleSomniaEntity extends SomniaEntity<Void, String> {}
 
     @Test
     public void test() throws ClassNotFoundException {

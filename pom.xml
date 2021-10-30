@@ -13,7 +13,7 @@
 
     <groupId>io.ep2p</groupId>
     <artifactId>somnia-core</artifactId>
-    <version>0.8.0-SNAPSHOT-3</version>
+    <version>0.8.0-RELEASE</version>
     <name>Somnia Decentralized Storage Library</name>
     <description>Private decentralized storage and network. Powered by Spring Boot and Kademlia algorithm.</description>
     <url>https://github.com/ep2p/somnia</url>

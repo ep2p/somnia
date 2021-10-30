@@ -28,7 +28,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import java.math.BigInteger;
 
@@ -40,7 +39,6 @@ import java.math.BigInteger;
         SomniaKademliaSettingsProperties.class
     }
 )
-@EnableMongoRepositories
 public class SomniaAutoConfiguration {
 
     @Bean("somniaSimpleModule")

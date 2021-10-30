@@ -11,11 +11,11 @@ import io.ep2p.somnia.model.RepositoryResponse;
 import io.ep2p.somnia.model.SomniaEntity;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
+import io.ep2p.somnia.model.query.Query;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.InvocationHandler;
-import org.springframework.data.mongodb.core.query.Query;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -141,7 +141,7 @@ public class SomniaRepositoryEnhancerFactory {
                 .key(key)
                 .name(through.getName())
                 .meta(SomniaKey.Meta.builder()
-                        .query(query.getQueryObject().toJson())
+                        .query(query)
                         .offset(offset)
                         .limit(limit)
                         .build())

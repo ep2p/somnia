@@ -12,6 +12,4 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class SomniaBaseConfigProperties {
     @Builder.Default
     private String basePackage = null;
-    @Builder.Default
-    private String mongoKeyIndexName = "s_key_index";
 }

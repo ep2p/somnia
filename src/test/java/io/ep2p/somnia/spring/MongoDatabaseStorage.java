@@ -6,7 +6,6 @@ import io.ep2p.somnia.model.SomniaEntity;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
 import io.ep2p.somnia.storage.Storage;
-import io.ep2p.somnia.util.QueryUtil;
 import lombok.SneakyThrows;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -29,6 +28,7 @@ public class MongoDatabaseStorage implements Storage {
 
     @SneakyThrows
     @Override
+    @SuppressWarnings("unchecked")
     public void store(Class<? extends SomniaEntity> classOfName, boolean uniqueKey, SomniaKey somniaKey, SomniaValue somniaValue) {
         SomniaEntity somniaEntity = classOfName.newInstance();
         Object o = objectMapper.readValue(somniaValue.getData().toString(), somniaEntity.getGenericClassType(0));

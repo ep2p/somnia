@@ -1,6 +1,7 @@
 package io.ep2p.somnia.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.ep2p.somnia.model.query.Query;
 import lombok.*;
 
 import java.io.Serializable;
@@ -46,7 +47,7 @@ public class SomniaKey implements Serializable {
         private long offset = 0;
         @Builder.Default
         private int limit = 20;
-        private String query;
+        private Query query;
         private JsonNode data;
 
         public Meta makeClone(){

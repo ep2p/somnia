@@ -17,11 +17,13 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import java.math.BigInteger;
 
 @TestConfiguration
 @EnableAutoConfiguration
+@EnableMongoRepositories
 public class SomniaTestConfiguration {
 
     @Bean("somniaDecentralizedConfigProperties")

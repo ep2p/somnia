@@ -3,6 +3,7 @@ package io.ep2p.somnia.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.ep2p.kademlia.exception.DuplicateStoreRequest;
 import io.ep2p.kademlia.model.LookupAnswer;
 import io.ep2p.kademlia.model.StoreAnswer;
 import io.ep2p.somnia.decentralized.SomniaDHTKademliaNode;
@@ -111,7 +112,7 @@ public class SomniaRepositoryEnhancerFactory {
                 log.error("Failed to store data with key " + somniaKey + " result: " + result);
                 return RepositoryResponse.builder().build();
             }
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (ExecutionException | InterruptedException | DuplicateStoreRequest e) {
             log.error("Failed to store data into somnia", e);
             return RepositoryResponse.builder().build();
         }

@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 public class SomniaKademliaSettingsProperties extends NodeSettings {
     public SomniaKademliaSettingsProperties(NodeSettings nodeSettings) {
-        super(nodeSettings.alpha, nodeSettings.identifierSize, nodeSettings.bucketSize, nodeSettings.findNodeSize, nodeSettings.maximumLastSeenAgeToConsiderAlive, nodeSettings.pingScheduleTimeValue, nodeSettings.pingScheduleTimeUnit, nodeSettings.dhtExecutorPoolSize, nodeSettings.dhtCleanupExecutorPoolSize, nodeSettings.maximumStoreAndLookupTimeoutValue, nodeSettings.maximumStoreAndGetTimeoutTimeUnit, nodeSettings.enabledFirstStoreRequestForcePass);
+        super(nodeSettings.alpha, nodeSettings.identifierSize, nodeSettings.bucketSize, nodeSettings.findNodeSize, nodeSettings.maximumLastSeenAgeToConsiderAlive, nodeSettings.pingScheduleTimeValue, nodeSettings.pingScheduleTimeUnit, nodeSettings.dhtExecutorPoolSize, nodeSettings.dhtScheduledExecutorPoolSize, nodeSettings.maximumStoreAndLookupTimeoutValue, nodeSettings.maximumStoreAndGetTimeoutTimeUnit, nodeSettings.enabledFirstStoreRequestForcePass);
     }
 
     public SomniaKademliaSettingsProperties() {

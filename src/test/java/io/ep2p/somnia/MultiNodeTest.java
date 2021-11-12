@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ep2p.kademlia.NodeSettings;
+import io.ep2p.kademlia.exception.DuplicateStoreRequest;
 import io.ep2p.kademlia.model.LookupAnswer;
 import io.ep2p.kademlia.node.KeyHashGenerator;
 import io.ep2p.kademlia.table.BigIntegerRoutingTable;
@@ -60,7 +61,7 @@ public class MultiNodeTest {
     }
 
     @Test
-    public void test_hit() throws JsonProcessingException, ExecutionException, InterruptedException {
+    public void test_hit() throws JsonProcessingException, ExecutionException, InterruptedException, DuplicateStoreRequest {
         this.node1.start(this.node2);
 
         this.node1.store(
@@ -94,7 +95,7 @@ public class MultiNodeTest {
     }
 
     @Test
-    public void test_distribute() throws JsonProcessingException, ExecutionException, InterruptedException {
+    public void test_distribute() throws JsonProcessingException, ExecutionException, InterruptedException, DuplicateStoreRequest {
         this.node1.start(this.node2);
 
         this.node1.store(

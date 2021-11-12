@@ -2,6 +2,7 @@ package io.ep2p.somnia;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.ep2p.kademlia.NodeSettings;
+import io.ep2p.kademlia.exception.DuplicateStoreRequest;
 import io.ep2p.kademlia.exception.FullBucketException;
 import io.ep2p.kademlia.model.LookupAnswer;
 import io.ep2p.kademlia.model.StoreAnswer;
@@ -75,7 +76,7 @@ public class DistributionTest {
     *  Proof that Somnia can distribute data for at least 1/4 of the network
     */
     @Test
-    public void minimumDistributionTest() throws InterruptedException, ExecutionException {
+    public void minimumDistributionTest() throws InterruptedException, ExecutionException, DuplicateStoreRequest {
         init_network(SomniaStorageConfig.builder()
                 .forceStore(true)
                 .perNodeDistribution(20)

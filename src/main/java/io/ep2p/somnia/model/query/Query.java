@@ -12,6 +12,7 @@ import java.util.List;
 @Setter
 public class Query {
     private List<Criteria<?>> criteriaList = new ArrayList<>();
+    private List<Order> orders = new ArrayList<>();
 
     public static Query withCriteria(Criteria<?> criteria){
         Query query = new Query();
@@ -21,6 +22,12 @@ public class Query {
 
     public synchronized Query addCriteria(Criteria<?> criteria){
         this.criteriaList.add(criteria);
+        return this;
+    }
+
+    public synchronized Query addOrder(Order order){
+        if (!this.orders.contains(order))
+            this.orders.add(order);
         return this;
     }
 

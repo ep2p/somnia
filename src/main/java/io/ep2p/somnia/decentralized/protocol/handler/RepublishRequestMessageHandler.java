@@ -25,7 +25,7 @@ public class RepublishRequestMessageHandler implements MessageHandler<BigInteger
     private final KeyHashGenerator<BigInteger, SomniaKey> somniaKeyHashGenerator;
     private final DistributionJobManager distributionJobManager;
 
-    public RepublishRequestMessageHandler(SomniaKeyHashGenerator somniaKeyHashGenerator, DistributionJobManager distributionJobManager) {
+    public RepublishRequestMessageHandler(KeyHashGenerator<BigInteger, SomniaKey> somniaKeyHashGenerator, DistributionJobManager distributionJobManager) {
         this.somniaKeyHashGenerator = somniaKeyHashGenerator;
         this.distributionJobManager = distributionJobManager;
     }

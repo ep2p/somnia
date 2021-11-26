@@ -16,10 +16,15 @@ import io.ep2p.somnia.config.properties.SomniaKademliaSettingsProperties;
 import io.ep2p.somnia.config.serialization.ExternalNodeDeserializer;
 import io.ep2p.somnia.config.serialization.ExternalNodeSerializer;
 import io.ep2p.somnia.decentralized.*;
+import io.ep2p.somnia.decentralized.protocol.SomniaMessageType;
+import io.ep2p.somnia.decentralized.protocol.handler.ChunkRequestMessageHandler;
+import io.ep2p.somnia.decentralized.protocol.handler.RepublishRequestMessageHandler;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.model.SomniaValue;
+import io.ep2p.somnia.service.DistributionJobManager;
 import io.ep2p.somnia.service.EntityManagerRegisterer;
 import io.ep2p.somnia.service.HashGenerator;
+import io.ep2p.somnia.service.SomniaDistributionJobManager;
 import io.ep2p.somnia.storage.DefaultCacheStorage;
 import io.ep2p.somnia.storage.Storage;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -99,8 +104,28 @@ public class SomniaAutoConfiguration {
         };
     }
 
+    @Bean("chunkMessageHandler")
+    @ConditionalOnMissingBean(name = "chunkMessageHandler", value = ChunkRequestMessageHandler.class)
+    @DependsOn({"somniaKademliaRepository"})
+    public ChunkRequestMessageHandler chunkRequestMessageHandler(SomniaKademliaRepository somniaKademliaRepository){
+        return new ChunkRequestMessageHandler(somniaKademliaRepository);
+    }
+
+    @Bean(value = "distributionJobManager", initMethod = "start")
+    @ConditionalOnMissingBean(name = "distributionJobManager", value = DistributionJobManager.class)
+    public DistributionJobManager distributionJobManager(){
+        return new SomniaDistributionJobManager();
+    }
+
+    @Bean("republishRequestMessageHandler")
+    @ConditionalOnMissingBean(name = "republishRequestMessageHandler", value = RepublishRequestMessageHandler.class)
+    @DependsOn({"somniaKeyHashGenerator", "distributionJobManager"})
+    public RepublishRequestMessageHandler republishRequestMessageHandler(KeyHashGenerator<BigInteger, SomniaKey> somniaKeyHashGenerator, DistributionJobManager distributionJobManager){
+        return new RepublishRequestMessageHandler(somniaKeyHashGenerator, distributionJobManager);
+    }
+
     @Bean(value = "somniaDHTKademliaNode", initMethod = "start")
-    @DependsOn({"somniaNodeId", "routingTable", "somniaConnectionInfo", "somniaMessageSender", "somniaKademliaRepository", "somniaKeyHashGenerator", "somniaEntityManager", "somniaDecentralizedConfig"})
+    @DependsOn({"somniaNodeId", "routingTable", "somniaConnectionInfo", "somniaMessageSender", "somniaKademliaRepository", "somniaKeyHashGenerator", "somniaEntityManager", "somniaDecentralizedConfig", "chunkRequestMessageHandler", "republishRequestMessageHandler"})
     @ConditionalOnMissingBean(name = "somniaDHTKademliaNode", value = SomniaDHTKademliaNode.class)
     public SomniaDHTKademliaNode somniaDHTKademliaNode(
             BigInteger somniaNodeId,
@@ -111,8 +136,13 @@ public class SomniaAutoConfiguration {
             KademliaRepository<SomniaKey, SomniaValue> somniaKademliaRepository,
             KeyHashGenerator<BigInteger, SomniaKey> somniaKeyHashGenerator,
             SomniaEntityManager somniaEntityManager,
-            SomniaStorageConfig somniaDecentralizedSomniaStorageConfig){
-        return new SomniaDHTKademliaNode(somniaNodeId, somniaConnectionInfo, routingTable, somniaMessageSender, somniaKademliaSettingsProperties, somniaKademliaRepository, somniaKeyHashGenerator, somniaEntityManager, somniaDecentralizedSomniaStorageConfig);
+            SomniaStorageConfig somniaDecentralizedSomniaStorageConfig,
+            ChunkRequestMessageHandler chunkRequestMessageHandler,
+            RepublishRequestMessageHandler republishRequestMessageHandler){
+        SomniaDHTKademliaNode somniaDHTKademliaNode = new SomniaDHTKademliaNode(somniaNodeId, somniaConnectionInfo, routingTable, somniaMessageSender, somniaKademliaSettingsProperties, somniaKademliaRepository, somniaKeyHashGenerator, somniaEntityManager, somniaDecentralizedSomniaStorageConfig);
+        somniaDHTKademliaNode.registerMessageHandler(SomniaMessageType.REPUBLISH_CHUNK_REQUEST, chunkRequestMessageHandler);
+        somniaDHTKademliaNode.registerMessageHandler(SomniaMessageType.REPUBLISH_REQUEST, republishRequestMessageHandler);
+        return somniaDHTKademliaNode;
     }
 
     @Bean("somniaHashGenerator")

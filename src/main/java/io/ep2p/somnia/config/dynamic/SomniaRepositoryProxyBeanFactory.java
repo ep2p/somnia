@@ -9,7 +9,6 @@ public class SomniaRepositoryProxyBeanFactory {
         this.somniaRepositoryEnhancerFactory = somniaRepositoryEnhancerFactory;
     }
 
-    @SuppressWarnings("unchecked")
     public <PS> PS createSomniaRepositoryProxyBean(ClassLoader classLoader, Class<PS> clazz) {
         return this.somniaRepositoryEnhancerFactory.create(classLoader, clazz);
     }

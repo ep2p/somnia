@@ -56,9 +56,7 @@ public class MongoDatabaseStorage implements Storage {
         List<? extends SomniaEntity> result = mongoTemplate.find(baseQuery, classOfName);
 
         List<Object> values = new ArrayList<>();
-        result.forEach(somniaEntity -> {
-            values.add(somniaEntity.getData());
-        });
+        result.forEach(somniaEntity -> values.add(somniaEntity.getData()));
 
         JsonNode jsonNode = objectMapper.valueToTree(values);
         return SomniaValue.builder()

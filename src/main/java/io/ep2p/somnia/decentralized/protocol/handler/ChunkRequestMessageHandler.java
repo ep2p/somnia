@@ -11,6 +11,7 @@ import io.ep2p.somnia.decentralized.protocol.message.ChunkResponseMessage;
 import io.ep2p.somnia.decentralized.protocol.message.RepublishMessage;
 import io.ep2p.somnia.model.SomniaValue;
 import lombok.var;
+
 import java.math.BigInteger;
 
 
@@ -21,6 +22,7 @@ public class ChunkRequestMessageHandler implements MessageHandler<BigInteger, So
         this.somniaKademliaRepository = somniaKademliaRepository;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <I extends KademliaMessage<BigInteger, SomniaConnectionInfo, ?>, O extends KademliaMessage<BigInteger, SomniaConnectionInfo, ?>> O handle(KademliaNodeAPI<BigInteger, SomniaConnectionInfo> kademliaNode, I message) {
         assert message instanceof ChunkRequestMessage;

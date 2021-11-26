@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+@SuppressWarnings("ALL")
 @Slf4j
 public class SomniaRepositoryEnhancerFactory {
     private final SomniaDHTKademliaNode somniaDHTKademliaNode;
@@ -46,47 +47,44 @@ public class SomniaRepositoryEnhancerFactory {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(clazz);
         enhancer.setClassLoader(classLoader);
-        enhancer.setCallback(new InvocationHandler() {
-            @Override
-            public Object invoke(Object object, Method method, Object[] args) throws Throwable {
-                Class<?> dataType = null;
-                Class<?> through = null;
-                Type[] genericInterfaces = clazz.getGenericInterfaces();
-                for (Type genericInterface : genericInterfaces) {
-                    if (genericInterface instanceof ParameterizedType) {
-                        Type[] genericTypes = ((ParameterizedType) genericInterface).getActualTypeArguments();
-                        if (genericTypes.length > 1){
-                            dataType = Class.forName(genericTypes[0].getTypeName());
-                            through = Class.forName(genericTypes[1].getTypeName());
-                        }
+        enhancer.setCallback((InvocationHandler) (object, method, args) -> {
+            Class<?> dataType = null;
+            Class<?> through = null;
+            Type[] genericInterfaces = clazz.getGenericInterfaces();
+            for (Type genericInterface : genericInterfaces) {
+                if (genericInterface instanceof ParameterizedType) {
+                    Type[] genericTypes = ((ParameterizedType) genericInterface).getActualTypeArguments();
+                    if (genericTypes.length > 1){
+                        dataType = Class.forName(genericTypes[0].getTypeName());
+                        through = Class.forName(genericTypes[1].getTypeName());
                     }
                 }
-
-                assert through != null;
-
-                somniaEntityManager.register((Class<? extends SomniaEntity<?, ?>>) through);
-                switch (method.getName()){
-                    case "save":
-                        assert args.length == 2 && args[0] instanceof BigInteger && args[1] instanceof Serializable;
-                        return save(through, (BigInteger) args[0], (Serializable) args[1]);
-                    case "findOne":
-                        assert args.length == 1 && args[0] instanceof BigInteger;
-                        return findOne(through, dataType, (BigInteger) args[0]);
-                    case "findAll":
-                        assert args.length == 1 && args[0] instanceof BigInteger;
-                        return findAll(through, dataType, (BigInteger) args[0]);
-                    case "find":
-                        if (args.length == 3 && args[0] instanceof BigInteger
-                                && args[1] instanceof Long && args[2] instanceof Integer){
-                            return find(through, dataType, (BigInteger) args[0], (Long) args[1], (Integer) args[2]);
-                        }
-                        if (args.length == 4 && args[0] instanceof BigInteger && args[1] instanceof Query
-                                && args[2] instanceof Long && args[3] instanceof Integer){
-                            return find(through, dataType, (BigInteger) args[0], (Query) args[1], (Long) args[2], (Integer) args[3]);
-                        }
-                }
-                throw new RuntimeException("Unknown method");
             }
+
+            assert through != null;
+
+            somniaEntityManager.register((Class<? extends SomniaEntity<?, ?>>) through);
+            switch (method.getName()){
+                case "save":
+                    assert args.length == 2 && args[0] instanceof BigInteger && args[1] instanceof Serializable;
+                    return save(through, (BigInteger) args[0], (Serializable) args[1]);
+                case "findOne":
+                    assert args.length == 1 && args[0] instanceof BigInteger;
+                    return findOne(through, dataType, (BigInteger) args[0]);
+                case "findAll":
+                    assert args.length == 1 && args[0] instanceof BigInteger;
+                    return findAll(through, dataType, (BigInteger) args[0]);
+                case "find":
+                    if (args.length == 3 && args[0] instanceof BigInteger
+                            && args[1] instanceof Long && args[2] instanceof Integer){
+                        return find(through, dataType, (BigInteger) args[0], (Long) args[1], (Integer) args[2]);
+                    }
+                    if (args.length == 4 && args[0] instanceof BigInteger && args[1] instanceof Query
+                            && args[2] instanceof Long && args[3] instanceof Integer){
+                        return find(through, dataType, (BigInteger) args[0], (Query) args[1], (Long) args[2], (Integer) args[3]);
+                    }
+            }
+            throw new RuntimeException("Unknown method");
         });
         return (PS) enhancer.create();
     }

@@ -111,17 +111,15 @@ public class SomniaDHTKademliaNode extends DHTKademliaNode<BigInteger, SomniaCon
 
     protected StoreAnswer<BigInteger, SomniaKey> handleStore(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value){
         Optional<SomniaDocument> optionalSomniaDocument = somniaEntityManager.getDocumentOfName(key.getName());
-        if (!optionalSomniaDocument.isPresent()){
-            return getNewStoreAnswer(key, StoreAnswer.Result.FAILED, this);
-        } else {
+        if (optionalSomniaDocument.isPresent()) {
             switch (optionalSomniaDocument.get().type()) {
                 case HIT:
                     return super.handleStore(caller, requester, key, value);
                 case DISTRIBUTE:
                     return handleDistributedStore(caller, requester, key, value);
             }
-            return getNewStoreAnswer(key, StoreAnswer.Result.FAILED, this);
         }
+        return getNewStoreAnswer(key, StoreAnswer.Result.FAILED, this);
     }
 
     private StoreAnswer<BigInteger, SomniaKey> handleDistributedStore(Node<BigInteger, SomniaConnectionInfo> caller, Node<BigInteger, SomniaConnectionInfo> requester, SomniaKey key, SomniaValue value) {

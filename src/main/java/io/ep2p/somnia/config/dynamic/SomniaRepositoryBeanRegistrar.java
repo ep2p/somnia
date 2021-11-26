@@ -20,7 +20,7 @@ import org.springframework.util.MultiValueMap;
 @Slf4j
 @Configuration
 public class SomniaRepositoryBeanRegistrar implements ImportBeanDefinitionRegistrar, BeanClassLoaderAware {
-    private ClassPathScanner classpathScanner;
+    private final ClassPathScanner classpathScanner;
     private ClassLoader classLoader;
 
     public SomniaRepositoryBeanRegistrar() {

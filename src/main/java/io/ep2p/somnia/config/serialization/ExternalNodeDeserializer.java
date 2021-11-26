@@ -1,7 +1,6 @@
 package io.ep2p.somnia.config.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,7 +22,7 @@ public class ExternalNodeDeserializer extends JsonDeserializer<ExternalNode<BigI
     }
 
     @Override
-    public ExternalNode<BigInteger, SomniaConnectionInfo> deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+    public ExternalNode<BigInteger, SomniaConnectionInfo> deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         JsonNode jsonNode = deserializationContext.readTree(jsonParser);
         SomniaConnectionInfo connectionInfo = objectMapper.readValue(jsonNode.get("connectionInfo").toString(), SomniaConnectionInfo.class);
         return new BigIntegerExternalNode<>(

@@ -13,11 +13,6 @@ public class GenericObjTest {
         SampleSomniaEntity sampleSomniaEntity = new SampleSomniaEntity();
         Class<Object> genericClassType = sampleSomniaEntity.getGenericClassType(0);
         Assertions.assertEquals(genericClassType, SampleData.class);
-        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                sampleSomniaEntity.getGenericClassType(2);
-            }
-        });
+        Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () -> sampleSomniaEntity.getGenericClassType(2));
     }
 }

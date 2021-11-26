@@ -33,7 +33,6 @@ public class DistributionTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final List<SomniaDHTKademliaNode> nodes = new ArrayList<>();
     private final int nodeSize = 100;
-    private final long timeout = 32000;
 
     private void init_network(SomniaStorageConfig somniaStorageConfig) throws ExecutionException, InterruptedException {
         nodes.clear();
@@ -48,12 +47,7 @@ public class DistributionTest {
         somniaEntityManager.register(SampleSomniaEntity3.class);
         TestMessageSenderAPI<BigInteger, SomniaConnectionInfo> messageSenderAPI = new TestMessageSenderAPI<>();
 
-        KeyHashGenerator<BigInteger, SomniaKey> keyHashGenerator = new KeyHashGenerator<BigInteger, SomniaKey>() {
-            @Override
-            public BigInteger generateHash(SomniaKey key) {
-                return key.getKey();
-            }
-        };
+        KeyHashGenerator<BigInteger, SomniaKey> keyHashGenerator = SomniaKey::getKey;
 
         NodeSettings nodeSettings = NodeSettings.Default.build();
 
@@ -113,7 +107,7 @@ public class DistributionTest {
                 value
         ).get();
 
-        Thread.sleep(this.timeout);
+        Thread.sleep(32000);
 
         AtomicInteger counter = new AtomicInteger();
 

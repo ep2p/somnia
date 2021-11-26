@@ -44,12 +44,7 @@ public class MultiNodeTest {
         SomniaKademliaRepository somniaKademliaRepository2 = new SomniaKademliaRepository(somniaEntityManager, new DefaultCacheStorage(objectMapper), new DefaultCacheStorage(objectMapper));
         NodeSettings nodeSettings = NodeSettings.Default.build();
 
-        KeyHashGenerator<BigInteger, SomniaKey> keyHashGenerator = new KeyHashGenerator<BigInteger, SomniaKey>() {
-            @Override
-            public BigInteger generateHash(SomniaKey key) {
-                return key.getKey();
-            }
-        };
+        KeyHashGenerator<BigInteger, SomniaKey> keyHashGenerator = SomniaKey::getKey;
         SomniaStorageConfig somniaStorageConfig = new SomniaStorageConfig();
 
 

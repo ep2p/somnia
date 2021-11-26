@@ -96,12 +96,7 @@ public class SomniaAutoConfiguration {
     @Bean(value = "somniaKeyHashGenerator")
     @ConditionalOnMissingBean(KeyHashGenerator.class)
     public KeyHashGenerator<BigInteger, SomniaKey> somniaKeyHashGenerator(){
-        return new KeyHashGenerator<BigInteger, SomniaKey>() {
-            @Override
-            public BigInteger generateHash(SomniaKey key) {
-                return key.getKey();
-            }
-        };
+        return SomniaKey::getKey;
     }
 
     @Bean("chunkMessageHandler")

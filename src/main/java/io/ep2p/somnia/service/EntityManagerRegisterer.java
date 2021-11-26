@@ -77,6 +77,7 @@ public class EntityManagerRegisterer {
                 Class<?> aClass = Class.forName(bd.getBeanClassName());
                 SomniaDocument somniaDocument = aClass.getAnnotation(SomniaDocument.class);
                 if (somniaDocument != null){
+                    //noinspection unchecked
                     somniaEntityManager.register((Class<SomniaEntity<?,?>>) aClass);
                 }
             }

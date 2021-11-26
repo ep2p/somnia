@@ -8,7 +8,6 @@ import io.ep2p.kademlia.protocol.message.EmptyKademliaMessage;
 import io.ep2p.kademlia.protocol.message.KademliaMessage;
 import io.ep2p.kademlia.protocol.message.PingKademliaMessage;
 import io.ep2p.somnia.decentralized.SomniaConnectionInfo;
-import io.ep2p.somnia.decentralized.SomniaKeyHashGenerator;
 import io.ep2p.somnia.decentralized.protocol.message.RepublishMessage;
 import io.ep2p.somnia.model.SomniaKey;
 import io.ep2p.somnia.service.DistributionJobManager;

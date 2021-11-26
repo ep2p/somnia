@@ -6,7 +6,6 @@ import io.ep2p.kademlia.node.external.ExternalNode;
 import io.ep2p.kademlia.protocol.message.KademliaMessage;
 import io.ep2p.kademlia.protocol.message.PingKademliaMessage;
 import io.ep2p.somnia.decentralized.SomniaConnectionInfo;
-import io.ep2p.somnia.decentralized.SomniaDHTKademliaNode;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
 

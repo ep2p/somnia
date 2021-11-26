@@ -22,11 +22,8 @@ public class SomniaKademliaRepository implements KademliaRepository<SomniaKey, S
     @Override
     public void store(SomniaKey somniaKey, SomniaValue somniaValue) {
         SomniaDocument somniaDocument = somniaEntityManager.getDocumentOfName(somniaKey.getName()).get();
-        if (somniaDocument.inMemory()) {
-            cacheStorage.store(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaDocument.uniqueKey(), somniaKey, somniaValue);
-        }else {
-            databaseStorage.store(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaDocument.uniqueKey(), somniaKey, somniaValue);
-        }
+        Storage storage = somniaDocument.inMemory() ? this.cacheStorage : this.databaseStorage;
+        storage.store(somniaEntityManager.getClassOfName(somniaKey.getName()), somniaDocument.uniqueKey(), somniaKey, somniaValue);
     }
 
     @SneakyThrows

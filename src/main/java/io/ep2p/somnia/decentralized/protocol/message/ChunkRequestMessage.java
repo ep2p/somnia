@@ -24,6 +24,6 @@ public class ChunkRequestMessage extends KademliaMessage<BigInteger, SomniaConne
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ChunkRequestData implements Serializable {
-        private SomniaKey somniaKey;
+        private SomniaKey key;
     }
 }

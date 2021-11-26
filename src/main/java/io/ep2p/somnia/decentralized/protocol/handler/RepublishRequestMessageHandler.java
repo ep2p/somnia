@@ -37,12 +37,12 @@ public class RepublishRequestMessageHandler implements MessageHandler<BigInteger
         var republishMessage = (RepublishMessage) message;
         republishMessage.getData().setTries(republishMessage.getData().getTries() + 1);
 
-        var hash = somniaKeyHashGenerator.generateHash(republishMessage.getData().getSomniaKey());
+        var hash = somniaKeyHashGenerator.generateHash(republishMessage.getData().getKey());
         var findNodeAnswer = kademliaNode.getRoutingTable().findClosest(hash);
 
         for (ExternalNode<BigInteger, SomniaConnectionInfo> externalNode: findNodeAnswer.getNodes()) {
             if (externalNode.getId().equals(kademliaNode.getId())){
-                distributionJobManager.addJob(republishMessage.getData().getSomniaKey(), republishMessage.getData().getRequester(), kademliaNode);
+                distributionJobManager.addJob(republishMessage.getData().getKey(), republishMessage.getData().getRequester(), kademliaNode);
                 kademliaNode.getMessageSender().sendAsyncMessage(
                         kademliaNode,
                         externalNode,

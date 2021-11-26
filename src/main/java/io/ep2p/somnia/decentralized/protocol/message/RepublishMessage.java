@@ -26,7 +26,7 @@ public class RepublishMessage extends KademliaMessage<BigInteger, SomniaConnecti
     @NoArgsConstructor
     public static class RepublishData implements Serializable {
         private Node<BigInteger, SomniaConnectionInfo> requester;
-        private SomniaKey somniaKey;
+        private SomniaKey key;
         private int tries;
     }
 }

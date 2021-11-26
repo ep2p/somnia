@@ -81,19 +81,19 @@ public class SomniaDistributionJobManager implements DistributionJobManager, Run
         int limit = 10;
         long outputSize = -1;
         var chunkRequest = new ChunkRequestMessage();
-        chunkRequest.setData(ChunkRequestMessage.ChunkRequestData.builder().somniaKey(key).build());
+        chunkRequest.setData(ChunkRequestMessage.ChunkRequestData.builder().key(key).build());
 
         while (outputSize == -1 || outputSize >= limit){
             key.getMeta().setOffset(offset);
             key.getMeta().setLimit(limit);
 
             chunkRequest.setData(ChunkRequestMessage.ChunkRequestData.builder()
-                    .somniaKey(job.key)
+                    .key(job.key)
                     .build());
             KademliaMessage<BigInteger, SomniaConnectionInfo, Serializable> responseMessage = dhtKademliaNodeAPI.getMessageSender().sendMessage(dhtKademliaNodeAPI, job.getNode(), chunkRequest);
             ChunkResponseMessage.ChunkResponseData chunkResponseData = (ChunkResponseMessage.ChunkResponseData) responseMessage.getData();
-            outputSize = chunkResponseData.getSomniaValue().getCount();
-            dhtKademliaNodeAPI.getKademliaRepository().store(key, chunkResponseData.getSomniaValue());
+            outputSize = chunkResponseData.getValue().getCount();
+            dhtKademliaNodeAPI.getKademliaRepository().store(key, chunkResponseData.getValue());
         }
     }
 

@@ -25,7 +25,7 @@ public class ChunkResponseMessage extends KademliaMessage<BigInteger, SomniaConn
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ChunkResponseData implements Serializable {
-        private SomniaKey somniaKey;
-        private SomniaValue somniaValue;
+        private SomniaKey key;
+        private SomniaValue value;
     }
 }

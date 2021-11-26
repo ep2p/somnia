@@ -42,7 +42,7 @@ public class RepublishRequestMessageHandler implements MessageHandler<BigInteger
 
         for (ExternalNode<BigInteger, SomniaConnectionInfo> externalNode: findNodeAnswer.getNodes()) {
             if (externalNode.getId().equals(kademliaNode.getId())){
-                distributionJobManager.addJob(republishMessage.getData().getSomniaKey(), republishMessage.getData().getRequester());
+                distributionJobManager.addJob(republishMessage.getData().getSomniaKey(), republishMessage.getData().getRequester(), kademliaNode);
                 kademliaNode.getMessageSender().sendAsyncMessage(
                         kademliaNode,
                         externalNode,
